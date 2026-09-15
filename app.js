@@ -4,18 +4,21 @@ const CONFIG = {
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
   autoScroll: true,
-  autoScrollStartDelay: 650,
-  autoScrollPixelsPerSecond: 138,
-  autoScrollResumeDelay: 1100,
-  autoScrollLoopDuration: 1150
+  autoScrollStartDelay: 4200,
+  autoScrollPixelsPerSecond: 158,
+  autoScrollResumeDelay: 780,
+  autoScrollLoopDuration: 900
 };
 
 const intro = document.getElementById('intro');
 const openInvite = document.getElementById('openInvite');
 const site = document.getElementById('site');
 const player = document.getElementById('player');
-const musicToggle = document.getElementById('musicToggle');
 const weddingAudio = document.getElementById('weddingAudio');
+const audioToggle = document.getElementById('audioToggle');
+const audioMute = document.getElementById('audioMute');
+const audioProgress = document.getElementById('audioProgress');
+const audioProgressBar = document.getElementById('audioProgressBar');
 const scrollProgress = document.getElementById('scrollProgress');
 const toast = document.getElementById('toast');
 const mapBtn = document.getElementById('mapBtn');
@@ -35,68 +38,54 @@ let autoScrollResumeTimer = null;
 let userCanInterrupt = false;
 let toastTimer = null;
 
-// Local audio integration. Put a legally obtained copy of:
-// TUL8TE & Vodafone — Ashan Habeeby
-// at: assets/ashan-habeeby.mp3
-let musicPlaying = false;
-let pendingMusicPlay = false;
-let audioMissingNotified = false;
-
-function showToast(message){
-  toast.textContent = message;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
-}
-
-function syncMusicUI(){
-  player.classList.toggle('playing', musicPlaying);
-  musicToggle.setAttribute('aria-label', musicPlaying ? 'إيقاف الموسيقى' : 'تشغيل الموسيقى');
-}
-
-async function playMusic(){
-  pendingMusicPlay = true;
+// Local wedding audio — user supplied file, so it can start directly from the opening click.
+function syncAudioUI(){
   if(!weddingAudio) return;
-  try{
-    weddingAudio.loop = true;
-    weddingAudio.volume = 0.9;
-    await weddingAudio.play();
-    musicPlaying = true;
-    syncMusicUI();
-  }catch(_){
-    musicPlaying = false;
-    syncMusicUI();
-    if(!audioMissingNotified){
-      audioMissingNotified = true;
-      showToast('ضيف ملف عشان حبيبي داخل assets/ashan-habeeby.mp3 ♫');
-    }
+  player.classList.toggle('playing', !weddingAudio.paused);
+  audioMute?.classList.toggle('muted', weddingAudio.muted);
+}
+
+function startWeddingAudio(){
+  if(!weddingAudio) return;
+  weddingAudio.volume = 0.9;
+  weddingAudio.currentTime = 0;
+  const playPromise = weddingAudio.play();
+  if(playPromise && typeof playPromise.catch === 'function'){
+    playPromise.catch(() => {
+      player.classList.add('needs-tap');
+      showToast('دوس تشغيل مرة واحدة عشان الأغنية تبدأ 🤎');
+      syncAudioUI();
+    });
   }
+  syncAudioUI();
 }
 
-function pauseMusic(){
-  pendingMusicPlay = false;
-  try{ weddingAudio?.pause(); }catch(_){ }
-  musicPlaying = false;
-  syncMusicUI();
-}
+audioToggle?.addEventListener('click', () => {
+  if(weddingAudio.paused) weddingAudio.play().catch(()=>{});
+  else weddingAudio.pause();
+  setTimeout(syncAudioUI, 0);
+});
 
-if(weddingAudio){
-  weddingAudio.loop = true;
-  weddingAudio.addEventListener('play', () => {
-    musicPlaying = true;
-    syncMusicUI();
-  });
-  weddingAudio.addEventListener('pause', () => {
-    musicPlaying = false;
-    syncMusicUI();
-  });
-  weddingAudio.addEventListener('ended', () => {
-    if(pendingMusicPlay){
-      weddingAudio.currentTime = 0;
-      playMusic();
-    }
-  });
-}
+audioMute?.addEventListener('click', () => {
+  weddingAudio.muted = !weddingAudio.muted;
+  syncAudioUI();
+});
+
+weddingAudio?.addEventListener('canplay', () => player.classList.remove('needs-tap'));
+weddingAudio?.addEventListener('play', () => { player.classList.remove('needs-tap'); syncAudioUI(); });
+weddingAudio?.addEventListener('pause', syncAudioUI);
+weddingAudio?.addEventListener('volumechange', syncAudioUI);
+weddingAudio?.addEventListener('timeupdate', () => {
+  if(!weddingAudio.duration || !audioProgressBar) return;
+  audioProgressBar.style.width = `${Math.min(100,(weddingAudio.currentTime / weddingAudio.duration) * 100)}%`;
+});
+
+audioProgress?.addEventListener('click', e => {
+  if(!weddingAudio.duration) return;
+  const rect = audioProgress.getBoundingClientRect();
+  const ratio = Math.min(1,Math.max(0,(e.clientX-rect.left)/rect.width));
+  weddingAudio.currentTime = weddingAudio.duration * ratio;
+});
 
 function cancelAutoRAF(){
   if(autoScrollRAF) cancelAnimationFrame(autoScrollRAF);
@@ -190,7 +179,8 @@ openInvite.addEventListener('click', () => {
   opened = true;
 
   intro.classList.add('opening');
-  playMusic();
+  // Start the local song inside the user gesture so browsers allow sound.
+  startWeddingAudio();
 
   setTimeout(() => {
     document.body.classList.remove('locked');
@@ -200,14 +190,14 @@ openInvite.addEventListener('click', () => {
     intro.classList.add('hide');
     window.scrollTo(0, 0);
 
+    // Give the cover a proper moment on screen before the cinematic scroll begins.
+    // Music is already playing from the opening click during this hold.
     setTimeout(() => {
       if(CONFIG.autoScroll) startAutoScroll();
-      setTimeout(() => { userCanInterrupt = true; }, 700);
+      setTimeout(() => { userCanInterrupt = true; }, 420);
     }, CONFIG.autoScrollStartDelay);
-  }, 760);
+  }, 520);
 });
-
-musicToggle.addEventListener('click', () => musicPlaying ? pauseMusic() : playMusic());
 // Any manual navigation only pauses the cinematic scroll temporarily.
 // As soon as the guest stops interacting, the invitation carries on by itself.
 let interactionResumeTimer = null;
@@ -226,7 +216,7 @@ function registerManualInteraction(delay = CONFIG.autoScrollResumeDelay){
   window.addEventListener(evt, e => {
     if(e.target.closest && e.target.closest('#player')) return;
     if(e.target.closest && e.target.closest('.wish-form')){
-      registerManualInteraction(4500);
+      registerManualInteraction(2800);
       return;
     }
     registerManualInteraction();
@@ -250,7 +240,7 @@ wishForm.addEventListener('focusout', () => {
   clearTimeout(autoScrollResumeTimer);
   autoScrollResumeTimer = setTimeout(() => {
     if(!wishForm.contains(document.activeElement)) startAutoScroll();
-  }, 3500);
+  }, 2300);
 });
 
 // Reveal animations
@@ -404,13 +394,18 @@ wishesTrack.addEventListener('touchend', e => {
 
 // Guestbook stays local for now. Every submitted word becomes a real slide
 // in the SAME slider above, so the page never grows into a long stack of cards.
-const STORAGE_KEY = 'ahmed-hader-wishes-v8';
+const STORAGE_KEY = 'ahmed-hader-wishes-v13';
 try{
   localStorage.removeItem('ahmed-hader-wishes-v3');
   localStorage.removeItem('ahmed-hader-wishes-v4');
   localStorage.removeItem('ahmed-hader-wishes-v5');
   localStorage.removeItem('ahmed-hader-wishes-v6');
   localStorage.removeItem('ahmed-hader-wishes-v7');
+  localStorage.removeItem('ahmed-hader-wishes-v8');
+  localStorage.removeItem('ahmed-hader-wishes-v9');
+  localStorage.removeItem('ahmed-hader-wishes-v10');
+  localStorage.removeItem('ahmed-hader-wishes-v11');
+  localStorage.removeItem('ahmed-hader-wishes-v12');
 }catch(_){ }
 
 function getWishes(){

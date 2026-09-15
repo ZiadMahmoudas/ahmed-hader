@@ -2,29 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
+  <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#cdb091" />
-  <meta name="description" content="دعوة زفاف Ahmed & Hader" />
-  <title>Ahmed & Hader — Wedding Invitation</title>
+  <meta name="description" content="دعوة زفاف Ahmed & Hadeer" />
+  <title>Ahmed & Hadeer — Wedding Invitation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://www.google.com">
+  <link rel="preload" as="image" href="/assets/invitation-cover.webp" type="image/webp" fetchpriority="high">
   <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="locked">
 
   <div id="intro" class="intro" aria-label="فتح دعوة الزفاف">
     <div class="intro-grain"></div>
-    <div class="botanical botanical-a" aria-hidden="true"></div>
-    <div class="botanical botanical-b" aria-hidden="true"></div>
+    <div class="intro-floral intro-floral--tl" aria-hidden="true"></div>
+    <div class="intro-floral intro-floral--tr" aria-hidden="true"></div>
+    <div class="intro-floral intro-floral--bl" aria-hidden="true"></div>
+    <div class="intro-floral intro-floral--br" aria-hidden="true"></div>
 
     <div id="introCard" class="intro-card">
       <div class="intro-card__border"></div>
       <span class="intro-kicker">WEDDING INVITATION</span>
       <div class="intro-monogram">A <i></i> H</div>
       <p class="intro-small">الفرحة دي ناقصها ناسها… وإنتوا من ناسنا</p>
-      <h1>Ahmed <em>&</em> Hader</h1>
+      <h1>Ahmed <em>&</em> Hadeer</h1>
       <div class="intro-divider"><span></span><b>♡</b><span></span></div>
       <p class="intro-date">30 · 12 · 2026</p>
       <button id="openInvite" class="open-btn" type="button">
@@ -32,21 +35,28 @@
         <strong>افتح الدعوة</strong>
         <small>وسيـب الحكاية تمشي معاك</small>
       </button>
-      <div class="intro-song"><span>♪</span><b>عشان حبيبي — TUL8TE</b><small>سيب الصوت شغال ♫</small></div>
+      <div class="intro-song"><span>♪</span><b>موسيقى الليلة جاهزة</b><small>افتح الدعوة وسيبها تمشي معاك من أول ثانية ♫</small></div>
     </div>
     <p class="intro-note">شغّل الصوت… وسيب الدعوة تاخدك معاها ✦</p>
   </div>
 
-  <!-- Local licensed audio. Put your legally obtained copy at assets/ashan-habeeby.mp3 -->
   <audio id="weddingAudio" preload="auto" loop playsinline>
-    <source src="assets/ashan-habeeby.mp3" type="audio/mpeg">
+    <source src="/assets/wedding-song.mp3" type="audio/mpeg">
+    <source src="/assets/wedding-song.webm" type="audio/webm">
   </audio>
 
   <main id="site" class="site" aria-hidden="true">
     <section class="cover" id="home">
+      <div class="cover-floral cover-floral--tl" aria-hidden="true"></div>
+      <div class="cover-floral cover-floral--tr" aria-hidden="true"></div>
+      <div class="cover-floral cover-floral--bl" aria-hidden="true"></div>
+      <div class="cover-floral cover-floral--br" aria-hidden="true"></div>
       <div class="cover-glow"></div>
       <figure class="cover-frame">
-        <img src="assets/invitation-cover.jpeg" alt="Ahmed & Hader wedding invitation" />
+        <picture>
+          <source srcset="/assets/invitation-cover.webp" type="image/webp">
+          <img src="/assets/invitation-cover.jpeg" alt="Ahmed & Hadeer wedding invitation" width="1024" height="1536" decoding="async" fetchpriority="high" />
+        </picture>
         <div class="cover-shine"></div>
       </figure>
       <div class="cover-bottom">
@@ -66,7 +76,7 @@
       <div class="story-copy reveal">
         <p>عدّت تفاصيل كتير لحد ما وصلنا لليوم ده، بس أكتر حاجة متأكدين منها إننا عايزين نبدأه وسط الناس اللي بنحبهم. عشان كده الدعوة دي مش مجرد ميعاد… دي عشان تكونوا جزء من ذكرى هنفضل فاكرينها طول العمر.</p>
         <p class="story-second">تعالوا افرحوا معانا من قلبكم، اضحكوا وارقصوا وخلو الليلة دي تاخد حقها 🤎</p>
-        <div class="signature">Ahmed <em>&</em> Hader</div>
+        <div class="signature">Ahmed <em>&</em> Hadeer</div>
       </div>
     </section>
 
@@ -87,7 +97,7 @@
     <section class="details section paper-section" id="details">
       <div class="section-title reveal">
         <span class="en">THE CELEBRATION</span>
-        <h2>خلاص… دي التفاصيل</h2>
+        <h2>دي التفاصيل</h2>
       </div>
 
       <div class="detail-stack">
@@ -137,7 +147,7 @@
         </div>
         <form id="wishForm" class="wish-form">
           <input id="wishName" type="text" maxlength="30" placeholder="اسمك" required />
-          <textarea id="wishMessage" maxlength="180" placeholder="اكتب اللي نفسك تقوله لـ Ahmed & Hader…" required></textarea>
+          <textarea id="wishMessage" maxlength="180" placeholder="اكتب اللي نفسك تقوله لـ Ahmed & Hadeer…" required></textarea>
           <button type="submit" class="primary-btn">سيب كلمتك 🤎</button>
         </form>
       </div>
@@ -147,7 +157,7 @@
       <div class="closing-card reveal">
         <span class="en">CAN'T WAIT TO SEE YOU</span>
         <div class="closing-mark">A <i></i> H</div>
-        <h2>مستنيينكم… بجد</h2>
+        <h2>مستنيينكم</h2>
         <p>من غيركم الليلة هتبقى ناقصة. مش محتاجين منكم غير إنكم تيجوا بقلب خفيف وفرحة كبيرة، ونعيش اليوم ده سوا.</p>
         <div class="closing-date">30 / 12 / 2026</div>
       </div>
@@ -155,25 +165,30 @@
 
     <footer>
       <span>ONE NIGHT • ONE MEMORY</span>
-      <strong>Ahmed & Hader</strong>
-      <small class="music-credit">Music · TUL8TE × Vodafone — Ashan Habeeby</small>
+      <strong>Ahmed & Hadeer</strong>
+      <small class="music-credit">Local wedding audio • loops all night ♫</small>
+      <small class="dev-credit">DEV : Ziad</small>
     </footer>
   </main>
 
-  <div id="player" class="player" aria-label="مشغل الموسيقى">
-    <div class="player-audio-row">
-      <button id="musicToggle" class="player-disc" type="button" aria-label="تشغيل أو إيقاف الموسيقى"><span>♪</span></button>
-      <div class="player-copy">
-        <small>NOW PLAYING</small>
-        <strong id="songTitle">عشان حبيبي — TUL8TE</strong>
-        <span class="loop-note">Audio · بتتعاد تلقائي ♫</span>
+  <div id="player" class="player local-audio-player" aria-label="مشغل موسيقى الفرح">
+    <button id="audioToggle" class="audio-toggle" type="button" aria-label="تشغيل أو إيقاف الموسيقى">
+      <span class="audio-icon audio-icon-play">▶</span>
+      <span class="audio-icon audio-icon-pause">Ⅱ</span>
+    </button>
+    <div class="audio-copy">
+      <small>NOW PLAYING • LOCAL AUDIO</small>
+      <strong>عشان حبيبي — أغنية الفرح</strong>
+      <div class="audio-progress" id="audioProgress" role="progressbar" aria-label="تقدم الأغنية">
+        <i id="audioProgressBar"></i>
       </div>
     </div>
+    <button id="audioMute" class="audio-mute" type="button" aria-label="كتم الصوت">♪</button>
   </div>
 
   <div class="scroll-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="app.js"></script>
+  <script src="/app.js" defer></script>
 </body>
 </html>
