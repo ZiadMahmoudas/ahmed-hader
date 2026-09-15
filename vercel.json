@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -14,6 +16,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/w/ahmed-hadder", "destination": "/index.html" },
+    { "source": "/w/:guest", "destination": "/index.html" },
     { "source": "/w/:path*", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
