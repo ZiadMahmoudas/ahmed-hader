@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#cdb091" />
+  <meta name="description" content="دعوة زفاف Ahmed & Hader" />
+  <title>Ahmed & Hader — Wedding Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.google.com">
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="locked">
+
+  <div id="intro" class="intro" aria-label="فتح دعوة الزفاف">
+    <div class="intro-grain"></div>
+    <div class="botanical botanical-a" aria-hidden="true"></div>
+    <div class="botanical botanical-b" aria-hidden="true"></div>
+
+    <div id="introCard" class="intro-card">
+      <div class="intro-card__border"></div>
+      <span class="intro-kicker">WEDDING INVITATION</span>
+      <div class="intro-monogram">A <i></i> H</div>
+      <p class="intro-small">الفرحة دي ناقصها ناسها… وإنتوا من ناسنا</p>
+      <h1>Ahmed <em>&</em> Hader</h1>
+      <div class="intro-divider"><span></span><b>♡</b><span></span></div>
+      <p class="intro-date">30 · 12 · 2026</p>
+      <button id="openInvite" class="open-btn" type="button">
+        <span class="seal-mini">A&H</span>
+        <strong>افتح الدعوة</strong>
+        <small>وسيـب الحكاية تمشي معاك</small>
+      </button>
+      <div class="intro-song"><span>♪</span><b>عشان حبيبي — TUL8TE</b><small>سيب الصوت شغال ♫</small></div>
+    </div>
+    <p class="intro-note">شغّل الصوت… وسيب الدعوة تاخدك معاها ✦</p>
+  </div>
+
+  <!-- Local licensed audio. Put your legally obtained copy at assets/ashan-habeeby.mp3 -->
+  <audio id="weddingAudio" preload="auto" loop playsinline>
+    <source src="assets/ashan-habeeby.mp3" type="audio/mpeg">
+  </audio>
+
+  <main id="site" class="site" aria-hidden="true">
+    <section class="cover" id="home">
+      <div class="cover-glow"></div>
+      <figure class="cover-frame">
+        <img src="assets/invitation-cover.jpeg" alt="Ahmed & Hader wedding invitation" />
+        <div class="cover-shine"></div>
+      </figure>
+      <div class="cover-bottom">
+        <span>OUR DAY • OUR PEOPLE</span>
+        <div class="mouse"><i></i></div>
+      </div>
+    </section>
+
+    <section class="story section paper-section" id="story">
+      <div class="paper-orbit orbit-one"></div>
+      <div class="paper-orbit orbit-two"></div>
+      <div class="section-title reveal">
+        <span class="en">A LITTLE NOTE FROM US</span>
+        <h2>من هنا هنبدأ بيتنا</h2>
+        <div class="tiny-flower">✦</div>
+      </div>
+      <div class="story-copy reveal">
+        <p>عدّت تفاصيل كتير لحد ما وصلنا لليوم ده، بس أكتر حاجة متأكدين منها إننا عايزين نبدأه وسط الناس اللي بنحبهم. عشان كده الدعوة دي مش مجرد ميعاد… دي عشان تكونوا جزء من ذكرى هنفضل فاكرينها طول العمر.</p>
+        <p class="story-second">تعالوا افرحوا معانا من قلبكم، اضحكوا وارقصوا وخلو الليلة دي تاخد حقها 🤎</p>
+        <div class="signature">Ahmed <em>&</em> Hader</div>
+      </div>
+    </section>
+
+    <section class="countdown-section section" id="countdown">
+      <div class="section-title reveal">
+        <span class="en">SAVE THE DATE</span>
+        <h2>فاضل قد إيه ونشوفكم؟</h2>
+      </div>
+      <div class="countdown reveal" aria-label="العد التنازلي للحفل">
+        <div class="count-box"><strong id="days">00</strong><span>يوم</span></div>
+        <div class="count-box"><strong id="hours">00</strong><span>ساعة</span></div>
+        <div class="count-box"><strong id="minutes">00</strong><span>دقيقة</span></div>
+        <div class="count-box"><strong id="seconds">00</strong><span>ثانية</span></div>
+      </div>
+      <p class="count-note reveal">الأربعاء · 30 ديسمبر 2026</p>
+    </section>
+
+    <section class="details section paper-section" id="details">
+      <div class="section-title reveal">
+        <span class="en">THE CELEBRATION</span>
+        <h2>خلاص… دي التفاصيل</h2>
+      </div>
+
+      <div class="detail-stack">
+        <article class="detail-card reveal">
+          <div class="detail-number">01</div>
+          <div class="detail-icon">◷</div>
+          <span>الوقت</span>
+          <h3>7:00 PM</h3>
+          <p>من 7 هنكون مستنيينكم… تعالوا بدري عشان نسلم عليكم قبل الزحمة 🤎</p>
+          <button id="calendarBtn" class="calendar-inline" type="button"><span>＋</span> حط اليوم في التقويم</button>
+        </article>
+
+        <article class="detail-card reveal">
+          <div class="detail-number">02</div>
+          <div class="detail-icon">⌖</div>
+          <span>المكان</span>
+          <h3>Le Ciel Hotel</h3>
+          <p>Lailaty Hall</p>
+          <a id="mapBtn" class="soft-link" href="#" target="_blank" rel="noopener">هات الطريق <b>↗</b></a>
+        </article>
+      </div>
+
+
+    </section>
+
+    <section class="wishes section" id="wishes">
+      <div class="section-title reveal">
+        <span class="en">FROM OUR FAVORITE PEOPLE</span>
+        <h2>كلمتين من ناسنا</h2>
+        <p>كل كلمة منكم هتفضل حتة حلوة من اليوم ده</p>
+      </div>
+      <div class="wishes-slider reveal empty" id="wishesSlider" aria-label="تعليقات الأهل والأصدقاء">
+        <div class="wishes-viewport">
+          <div class="wishes-track" id="wishesTrack"></div>
+        </div>
+        <div class="wishes-controls">
+          <button id="wishPrev" class="wish-nav" type="button" aria-label="التعليق السابق">‹</button>
+          <div class="wish-count" aria-live="polite"><strong id="wishCurrent">00</strong><i></i><span id="wishTotal">00</span></div>
+          <button id="wishNext" class="wish-nav" type="button" aria-label="التعليق التالي">›</button>
+        </div>
+      </div>
+
+      <div class="guestbook reveal">
+        <div class="guestbook-head">
+          <span>GUEST BOOK</span>
+          <h3>سيب لنا كلمة نرجع نقراها بعدين</h3>
+        </div>
+        <form id="wishForm" class="wish-form">
+          <input id="wishName" type="text" maxlength="30" placeholder="اسمك" required />
+          <textarea id="wishMessage" maxlength="180" placeholder="اكتب اللي نفسك تقوله لـ Ahmed & Hader…" required></textarea>
+          <button type="submit" class="primary-btn">سيب كلمتك 🤎</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="closing section paper-section" id="closing">
+      <div class="closing-card reveal">
+        <span class="en">CAN'T WAIT TO SEE YOU</span>
+        <div class="closing-mark">A <i></i> H</div>
+        <h2>مستنيينكم… بجد</h2>
+        <p>من غيركم الليلة هتبقى ناقصة. مش محتاجين منكم غير إنكم تيجوا بقلب خفيف وفرحة كبيرة، ونعيش اليوم ده سوا.</p>
+        <div class="closing-date">30 / 12 / 2026</div>
+      </div>
+    </section>
+
+    <footer>
+      <span>ONE NIGHT • ONE MEMORY</span>
+      <strong>Ahmed & Hader</strong>
+      <small class="music-credit">Music · TUL8TE × Vodafone — Ashan Habeeby</small>
+    </footer>
+  </main>
+
+  <div id="player" class="player" aria-label="مشغل الموسيقى">
+    <div class="player-audio-row">
+      <button id="musicToggle" class="player-disc" type="button" aria-label="تشغيل أو إيقاف الموسيقى"><span>♪</span></button>
+      <div class="player-copy">
+        <small>NOW PLAYING</small>
+        <strong id="songTitle">عشان حبيبي — TUL8TE</strong>
+        <span class="loop-note">Audio · بتتعاد تلقائي ♫</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
