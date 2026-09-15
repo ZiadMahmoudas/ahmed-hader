@@ -1,5 +1,5 @@
 const CONFIG = {
-  names: "Ahmed & Hader",
+  names: "Ahmed & Hadder",
   dateISO: "2026-12-30T19:00:00+02:00",
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
@@ -8,6 +8,15 @@ const CONFIG = {
   autoScrollPixelsPerSecond: 158,
   autoScrollResumeDelay: 780,
   autoScrollLoopDuration: 900
+};
+
+const SUPABASE_CONFIG = {
+  url: "https://clkgajwnhppwnkzemxgi.supabase.co",
+  key: "sb_publishable_5Mcd8Aj5t376Uu1A9E0whQ_c_dTrbR7",
+  table: "wedding_wishes",
+  eventSlug: "ahmed-hadder",
+  pollMs: 3000,
+  maxRows: 100
 };
 
 const intro = document.getElementById('intro');
@@ -261,8 +270,8 @@ function updateCountdown(){
 }
 updateCountdown();
 setInterval(updateCountdown,1000);
-
-// Map
+Hadder
+// MapHadder
 mapBtn.href = CONFIG.mapUrl;
 
 calendarBtn.addEventListener('click', () => {
@@ -270,7 +279,7 @@ calendarBtn.addEventListener('click', () => {
   const end = new Date(start.getTime()+4*60*60*1000);
   const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const ics = [
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
+    'BEGIN:VCALENDARHadderRSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
     `UID:${Date.now()}@ahmed-Hader-wedding`,`DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(start)}`,`DTEND:${fmt(end)}`,`SUMMARY:Wedding of ${CONFIG.names}`,
     `LOCATION:${CONFIG.venue}`,'DESCRIPTION:Can\'t wait to celebrate this day together.','END:VEVENT','END:VCALENDAR'
@@ -373,63 +382,231 @@ wishesTrack.addEventListener('touchend', e => {
   const delta = endX - sliderTouchStartX;
   sliderTouchStartX = null;
   if(Math.abs(delta) < 45 || !wishSlides.length) return;
-  if(delta < 0) wishIndex = (wishIndex + 1) % wishSlides.length;
+  if(delta < 0) wishIndex =HadderhIndex + 1) % wishSlides.length;
   else wishIndex = (wishIndex - 1 + wishSlides.length) % wishSlides.length;
+  updateWishesSlider();Hadder
+  scheduleWishesSlider();Hadder
+}, {passive:true});Hadder
+Hadder
+Hadder
+// Supabase guestbook — shared byHaddery guest.
+// Uses the publishable key in thHadderwser and relies on RLS in Supabase.
+// No localStorage is used for wiHadderanymore.
+const wishSubmitBtn = wishForm?.qHadderelector('button[type="submit"]');
+const renderedWishIds = new Set()Hadder
+let lastWishId = 0;
+let wishesLoaded = false;
+let wishesRequestBusy = false;
+let wishesPollTimer = null;
+
+function supabaseHeaders(extra = {}){
+  return {
+    apikey: SUPABASE_CONFIG.key,
+    ...extra
+  };
+}
+
+function buildWishesUrl({ afterId = 0, limit = SUPABASE_CONFIG.maxRows } = {}){
+  const base = `${SUPABASE_CONFIG.url}/rest/v1/${SUPABASE_CONFIG.table}`;
+  const params = new URLSearchParams();
+  params.set('select', 'id,name,message,created_at');
+  params.set('event_slug', `eq.${SUPABASE_CONFIG.eventSlug}`);
+  if(afterId > 0) params.set('id', `gt.${afterId}`);
+  params.set('order', 'id.asc');
+  params.set('limit', String(limit));
+  return `${base}?${params.toString()}`;
+}
+
+function clearWishSlides(){
+  wishesTrack.replaceChildren();
+  renderedWishIds.clear();
+  wishIndex = 0;
+  lastWishId = 0;
+  refreshWishSlides();
   updateWishesSlider();
-  scheduleWishesSlider();
-}, {passive:true});
+}
 
+function appendSupabaseWish(wish, { jumpTo = false, deferUpdate = false } = {}){
+  if(!wish || wish.id == null) return false;
+  const id = String(wish.id);
+  if(renderedWishIds.has(id)) return false;
 
-// Guestbook stays local for now. Every submitted word becomes a real slide
-// in the SAME slider above, so the page never grows into a long stack of cards.
-const STORAGE_KEY = 'ahmed-Hader-wishes-v13';
-try{
-  localStorage.removeItem('ahmed-Hader-wishes-v3');
-  localStorage.removeItem('ahmed-Hader-wishes-v4');
-  localStorage.removeItem('ahmed-Hader-wishes-v5');
-  localStorage.removeItem('ahmed-Hader-wishes-v6');
-  localStorage.removeItem('ahmed-Hader-wishes-v7');
-  localStorage.removeItem('ahmed-Hader-wishes-v8');
-  localStorage.removeItem('ahmed-Hader-wishes-v9');
-  localStorage.removeItem('ahmed-Hader-wishes-v10');
-  localStorage.removeItem('ahmed-Hader-wishes-v11');
-  localStorage.removeItem('ahmed-Hader-wishes-v12');
-}catch(_){ }
+  renderedWishIds.add(id);
+  lastWishId = Math.max(lastWishId, Number(wish.id) || 0);
 
-function getWishes(){
+  const card = document.createElement('article');
+  card.className = 'wish-card user-wish-card';
+  card.dataset.wishId = id;
+
+  const name = document.createElement('strong');
+  name.className = 'wish-name';
+  name.textContent = String(wish.name || '').trim();
+
+  const message = document.createElement('p');
+  message.textContent = String(wish.message || '').trim();
+
+  card.append(name, message);
+  wishesTrack.appendChild(card);
+
+  if(!deferUpdate){
+    refreshWishSlides();
+    if(jumpTo) wishIndex = Math.max(0, wishSlides.length - 1);
+    updateWishesSlider();
+  }
+  return true;
+}
+
+async function loadAllWishesFromSupabase(){
+  if(wishesRequestBusy) return;
+  wishesRequestBusy = true;
+
   try{
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(data) ? data : [];
-  }catch(_){
-    return [];
+    const response = await fetch(buildWishesUrl(), {
+      method: 'GET',
+      headers: supabaseHeaders(),
+      cache: 'no-store'
+    });
+
+    if(!response.ok){
+      throw new Error(`Supabase load failed: ${response.status}`);
+    }
+
+    const rows = await response.json();
+    clearWishSlides();
+
+    if(Array.isArray(rows)){
+      rows.forEach(row => appendSupabaseWish(row, { deferUpdate: true }));
+    }
+
+    refreshWishSlides();
+    updateWishesSlider();
+    scheduleWishesSlider();
+    wishesLoaded = true;
+  }catch(error){
+    console.error(error);
+    showToast('التعليقات هتظهر أول ما الاتصال يرجع 🤎');
+  }finally{
+    wishesRequestBusy = false;
   }
 }
 
-// Restore saved local messages directly into the slider.
-getWishes().forEach(wish => appendWishSlide(wish));
-refreshWishSlides();
-updateWishesSlider();
-scheduleWishesSlider();
+async function syncNewWishesFromSupabase(){
+  if(document.visibilityState === 'hidden' || wishesRequestBusy) return;
+  if(!wishesLoaded){
+    await loadAllWishesFromSupabase();
+    return;
+  }
 
-wishForm.addEventListener('submit', e => {
+  wishesRequestBusy = true;
+  try{
+    const response = await fetch(buildWishesUrl({ afterId: lastWishId, limit: 50 }), {
+      method: 'GET',
+      headers: supabaseHeaders(),
+      cache: 'no-store'
+    });
+
+    if(!response.ok){
+      throw new Error(`Supabase sync failed: ${response.status}`);
+    }
+
+    const rows = await response.json();
+    let added = 0;
+
+    if(Array.isArray(rows)){
+      rows.forEach(row => {
+        if(appendSupabaseWish(row, { deferUpdate: true })) added += 1;
+      });
+    }
+
+    if(added){
+      refreshWishSlides();
+      updateWishesSlider();
+      scheduleWishesSlider();
+    }
+  }catch(error){
+    console.error(error);
+  }finally{
+    wishesRequestBusy = false;
+  }
+}
+
+function startWishesSync(){
+  clearInterval(wishesPollTimer);
+  wishesPollTimer = setInterval(syncNewWishesFromSupabase, SUPABASE_CONFIG.pollMs);
+}
+
+async function saveWishToSupabase(name, message){
+  const endpoint = `${SUPABASE_CONFIG.url}/rest/v1/${SUPABASE_CONFIG.table}`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: supabaseHeaders({
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }),
+    body: JSON.stringify({
+      event_slug: SUPABASE_CONFIG.eventSlug,
+      name,
+      message
+    })
+  });
+
+  if(!response.ok){
+    const detail = await response.text().catch(() => '');
+    throw new Error(`Supabase insert failed: ${response.status} ${detail}`);
+  }
+
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+// Load in the background immediately so the slider is ready before auto-scroll reaches it.
+loadAllWishesFromSupabase();
+startWishesSync();
+
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') syncNewWishesFromSupabase();
+});
+
+wishForm.addEventListener('submit', async e => {
   e.preventDefault();
+
   const name = wishName.value.trim();
   const message = wishMessage.value.trim();
   if(!name || !message) return;
 
-  const wishes = getWishes();
-  const wish = { name, message, createdAt: Date.now() };
-  wishes.push(wish);
-  // Local-only for now; keep enough entries without letting storage grow forever.
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes.slice(-60)));
+  const oldBtnText = wishSubmitBtn?.textContent || '';
+  if(wishSubmitBtn){
+    wishSubmitBtn.disabled = true;
+    wishSubmitBtn.textContent = 'بنضيف كلمتك…';
+  }
 
-  wishForm.reset();
-  appendWishSlide(wish, { jumpTo: true });
-  scheduleWishesSlider();
-  showToast('كلمتك اتضافت للسلايدر 🤎');
+  registerManualInteraction(4500);
 
-  // Let the guest see their own message before cinematic auto-scroll resumes.
-  registerManualInteraction(3600);
+  try{
+    const savedWish = await saveWishToSupabase(name, message);
+
+    wishForm.reset();
+
+    if(savedWish){
+      appendSupabaseWish(savedWish, { jumpTo: true });
+      refreshWishSlides();
+      wishIndex = Math.max(0, wishSlides.length - 1);
+      updateWishesSlider();
+      scheduleWishesSlider();
+    }else{
+      await syncNewWishesFromSupabase();
+    }
+
+    showToast('كلمتك وصلت واتضافت لكل الناس 🤎');
+  }catch(error){
+    console.error(error);
+    showToast('مقدرتش أحفظ الكلمة دلوقتي… جرّب تاني');
+  }finally{
+    if(wishSubmitBtn){
+      wishSubmitBtn.disabled = false;
+      wishSubmitBtn.textContent = oldBtnText;
+    }
+  }
 });
 
 // Route-safe image fallback: if the deployed WebP is stale/missing, fall back to JPEG.
