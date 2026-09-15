@@ -1,5 +1,5 @@
 const CONFIG = {
-  names: "Ahmed & Hader",
+  names: "Ahmed & Hadder",
   dateISO: "2026-12-30T19:00:00+02:00",
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
@@ -282,8 +282,8 @@ calendarBtn.addEventListener('click', () => {
   const end = new Date(start.getTime()+4*60*60*1000);
   const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const ics = [
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
-    `UID:${Date.now()}@ahmed-hader-wedding`,`DTSTAMP:${fmt(new Date())}`,
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHadderWedding//EN','BEGIN:VEVENT',
+    `UID:${Date.now()}@ahmed-Hadder-wedding`,`DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(start)}`,`DTEND:${fmt(end)}`,`SUMMARY:Wedding of ${CONFIG.names}`,
     `LOCATION:${CONFIG.venue}`,'DESCRIPTION:Can\'t wait to celebrate this day together.','END:VEVENT','END:VCALENDAR'
   ].join('\r\n');
@@ -291,7 +291,7 @@ calendarBtn.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='Ahmed-Hader-Wedding.ics';
+  a.download='Ahmed-Hadder-Wedding.ics';
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -394,18 +394,18 @@ wishesTrack.addEventListener('touchend', e => {
 
 // Guestbook stays local for now. Every submitted word becomes a real slide
 // in the SAME slider above, so the page never grows into a long stack of cards.
-const STORAGE_KEY = 'ahmed-hader-wishes-v13';
+const STORAGE_KEY = 'ahmed-Hadder-wishes-v13';
 try{
-  localStorage.removeItem('ahmed-hader-wishes-v3');
-  localStorage.removeItem('ahmed-hader-wishes-v4');
-  localStorage.removeItem('ahmed-hader-wishes-v5');
-  localStorage.removeItem('ahmed-hader-wishes-v6');
-  localStorage.removeItem('ahmed-hader-wishes-v7');
-  localStorage.removeItem('ahmed-hader-wishes-v8');
-  localStorage.removeItem('ahmed-hader-wishes-v9');
-  localStorage.removeItem('ahmed-hader-wishes-v10');
-  localStorage.removeItem('ahmed-hader-wishes-v11');
-  localStorage.removeItem('ahmed-hader-wishes-v12');
+  localStorage.removeItem('ahmed-Hadder-wishes-v3');
+  localStorage.removeItem('ahmed-Hadder-wishes-v4');
+  localStorage.removeItem('ahmed-Hadder-wishes-v5');
+  localStorage.removeItem('ahmed-Hadder-wishes-v6');
+  localStorage.removeItem('ahmed-Hadder-wishes-v7');
+  localStorage.removeItem('ahmed-Hadder-wishes-v8');
+  localStorage.removeItem('ahmed-Hadder-wishes-v9');
+  localStorage.removeItem('ahmed-Hadder-wishes-v10');
+  localStorage.removeItem('ahmed-Hadder-wishes-v11');
+  localStorage.removeItem('ahmed-Hadder-wishes-v12');
 }catch(_){ }
 
 function getWishes(){
