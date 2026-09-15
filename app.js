@@ -443,3 +443,15 @@ wishForm.addEventListener('submit', e => {
   // Let the guest see their own message before cinematic auto-scroll resumes.
   registerManualInteraction(3600);
 });
+
+// Route-safe image fallback: if the deployed WebP is stale/missing, fall back to JPEG.
+document.querySelectorAll('.cover-frame img').forEach(img => {
+  img.addEventListener('error', () => {
+    if(!img.dataset.fallbackTried){
+      img.dataset.fallbackTried = '1';
+      const source = img.parentElement?.querySelector('source');
+      if(source) source.remove();
+      img.src = '/assets/invitation-cover-v16.jpeg?v=16';
+    }
+  });
+});
