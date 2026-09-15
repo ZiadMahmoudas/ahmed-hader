@@ -1,5 +1,5 @@
 const CONFIG = {
-  names: "Ahmed & Hadder",
+  names: "Ahmed & Hader",
   dateISO: "2026-12-30T19:00:00+02:00",
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
@@ -16,9 +16,6 @@ const site = document.getElementById('site');
 const player = document.getElementById('player');
 const weddingAudio = document.getElementById('weddingAudio');
 const audioToggle = document.getElementById('audioToggle');
-const audioMute = document.getElementById('audioMute');
-const audioProgress = document.getElementById('audioProgress');
-const audioProgressBar = document.getElementById('audioProgressBar');
 const scrollProgress = document.getElementById('scrollProgress');
 const toast = document.getElementById('toast');
 const mapBtn = document.getElementById('mapBtn');
@@ -38,22 +35,28 @@ let autoScrollResumeTimer = null;
 let userCanInterrupt = false;
 let toastTimer = null;
 
+function showToast(message){
+  if(!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
 // Local wedding audio — user supplied file, so it can start directly from the opening click.
 function syncAudioUI(){
-  if(!weddingAudio) return;
+  if(!weddingAudio || !player) return;
   player.classList.toggle('playing', !weddingAudio.paused);
-  audioMute?.classList.toggle('muted', weddingAudio.muted);
+  player.classList.toggle('needs-tap', weddingAudio.paused && opened);
 }
 
 function startWeddingAudio(){
   if(!weddingAudio) return;
   weddingAudio.volume = 0.9;
-  weddingAudio.currentTime = 0;
   const playPromise = weddingAudio.play();
   if(playPromise && typeof playPromise.catch === 'function'){
     playPromise.catch(() => {
-      player.classList.add('needs-tap');
-      showToast('دوس تشغيل مرة واحدة عشان الأغنية تبدأ 🤎');
+      player?.classList.add('needs-tap');
       syncAudioUI();
     });
   }
@@ -61,31 +64,16 @@ function startWeddingAudio(){
 }
 
 audioToggle?.addEventListener('click', () => {
-  if(weddingAudio.paused) weddingAudio.play().catch(()=>{});
+  if(weddingAudio.paused) weddingAudio.play().then(()=>player?.classList.remove('needs-tap')).catch(()=>{});
   else weddingAudio.pause();
   setTimeout(syncAudioUI, 0);
 });
 
-audioMute?.addEventListener('click', () => {
-  weddingAudio.muted = !weddingAudio.muted;
-  syncAudioUI();
-});
 
 weddingAudio?.addEventListener('canplay', () => player.classList.remove('needs-tap'));
 weddingAudio?.addEventListener('play', () => { player.classList.remove('needs-tap'); syncAudioUI(); });
 weddingAudio?.addEventListener('pause', syncAudioUI);
-weddingAudio?.addEventListener('volumechange', syncAudioUI);
-weddingAudio?.addEventListener('timeupdate', () => {
-  if(!weddingAudio.duration || !audioProgressBar) return;
-  audioProgressBar.style.width = `${Math.min(100,(weddingAudio.currentTime / weddingAudio.duration) * 100)}%`;
-});
 
-audioProgress?.addEventListener('click', e => {
-  if(!weddingAudio.duration) return;
-  const rect = audioProgress.getBoundingClientRect();
-  const ratio = Math.min(1,Math.max(0,(e.clientX-rect.left)/rect.width));
-  weddingAudio.currentTime = weddingAudio.duration * ratio;
-});
 
 function cancelAutoRAF(){
   if(autoScrollRAF) cancelAnimationFrame(autoScrollRAF);
@@ -282,8 +270,8 @@ calendarBtn.addEventListener('click', () => {
   const end = new Date(start.getTime()+4*60*60*1000);
   const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const ics = [
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHadderWedding//EN','BEGIN:VEVENT',
-    `UID:${Date.now()}@ahmed-Hadder-wedding`,`DTSTAMP:${fmt(new Date())}`,
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
+    `UID:${Date.now()}@ahmed-Hader-wedding`,`DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(start)}`,`DTEND:${fmt(end)}`,`SUMMARY:Wedding of ${CONFIG.names}`,
     `LOCATION:${CONFIG.venue}`,'DESCRIPTION:Can\'t wait to celebrate this day together.','END:VEVENT','END:VCALENDAR'
   ].join('\r\n');
@@ -291,7 +279,7 @@ calendarBtn.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='Ahmed-Hadder-Wedding.ics';
+  a.download='Ahmed-Hader-Wedding.ics';
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -394,18 +382,18 @@ wishesTrack.addEventListener('touchend', e => {
 
 // Guestbook stays local for now. Every submitted word becomes a real slide
 // in the SAME slider above, so the page never grows into a long stack of cards.
-const STORAGE_KEY = 'ahmed-Hadder-wishes-v13';
+const STORAGE_KEY = 'ahmed-Hader-wishes-v13';
 try{
-  localStorage.removeItem('ahmed-Hadder-wishes-v3');
-  localStorage.removeItem('ahmed-Hadder-wishes-v4');
-  localStorage.removeItem('ahmed-Hadder-wishes-v5');
-  localStorage.removeItem('ahmed-Hadder-wishes-v6');
-  localStorage.removeItem('ahmed-Hadder-wishes-v7');
-  localStorage.removeItem('ahmed-Hadder-wishes-v8');
-  localStorage.removeItem('ahmed-Hadder-wishes-v9');
-  localStorage.removeItem('ahmed-Hadder-wishes-v10');
-  localStorage.removeItem('ahmed-Hadder-wishes-v11');
-  localStorage.removeItem('ahmed-Hadder-wishes-v12');
+  localStorage.removeItem('ahmed-Hader-wishes-v3');
+  localStorage.removeItem('ahmed-Hader-wishes-v4');
+  localStorage.removeItem('ahmed-Hader-wishes-v5');
+  localStorage.removeItem('ahmed-Hader-wishes-v6');
+  localStorage.removeItem('ahmed-Hader-wishes-v7');
+  localStorage.removeItem('ahmed-Hader-wishes-v8');
+  localStorage.removeItem('ahmed-Hader-wishes-v9');
+  localStorage.removeItem('ahmed-Hader-wishes-v10');
+  localStorage.removeItem('ahmed-Hader-wishes-v11');
+  localStorage.removeItem('ahmed-Hader-wishes-v12');
 }catch(_){ }
 
 function getWishes(){
@@ -451,7 +439,7 @@ document.querySelectorAll('.cover-frame img').forEach(img => {
       img.dataset.fallbackTried = '1';
       const source = img.parentElement?.querySelector('source');
       if(source) source.remove();
-      img.src = '/assets/invitation-cover-v16.jpeg?v=16';
+      img.src = '/assets/invitation-cover.jpeg?v=17';
     }
   });
 });
