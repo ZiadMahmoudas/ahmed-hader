@@ -1,5 +1,5 @@
 const CONFIG = {
-  names: "Ahmed & Hadder",
+  names: "Ahmed & Hader",
   dateISO: "2026-12-30T19:00:00+02:00",
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
@@ -270,8 +270,8 @@ function updateCountdown(){
 }
 updateCountdown();
 setInterval(updateCountdown,1000);
-Hadder
-// MapHadder
+
+// Map
 mapBtn.href = CONFIG.mapUrl;
 
 calendarBtn.addEventListener('click', () => {
@@ -279,7 +279,7 @@ calendarBtn.addEventListener('click', () => {
   const end = new Date(start.getTime()+4*60*60*1000);
   const fmt = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const ics = [
-    'BEGIN:VCALENDARHadderRSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AhmedHaderWedding//EN','BEGIN:VEVENT',
     `UID:${Date.now()}@ahmed-Hader-wedding`,`DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(start)}`,`DTEND:${fmt(end)}`,`SUMMARY:Wedding of ${CONFIG.names}`,
     `LOCATION:${CONFIG.venue}`,'DESCRIPTION:Can\'t wait to celebrate this day together.','END:VEVENT','END:VCALENDAR'
@@ -382,18 +382,18 @@ wishesTrack.addEventListener('touchend', e => {
   const delta = endX - sliderTouchStartX;
   sliderTouchStartX = null;
   if(Math.abs(delta) < 45 || !wishSlides.length) return;
-  if(delta < 0) wishIndex =HadderhIndex + 1) % wishSlides.length;
+  if(delta < 0) wishIndex = (wishIndex + 1) % wishSlides.length;
   else wishIndex = (wishIndex - 1 + wishSlides.length) % wishSlides.length;
-  updateWishesSlider();Hadder
-  scheduleWishesSlider();Hadder
-}, {passive:true});Hadder
-Hadder
-Hadder
-// Supabase guestbook — shared byHaddery guest.
-// Uses the publishable key in thHadderwser and relies on RLS in Supabase.
-// No localStorage is used for wiHadderanymore.
-const wishSubmitBtn = wishForm?.qHadderelector('button[type="submit"]');
-const renderedWishIds = new Set()Hadder
+  updateWishesSlider();
+  scheduleWishesSlider();
+}, {passive:true});
+
+
+// Supabase guestbook — shared by every guest.
+// Uses the publishable key in the browser and relies on RLS in Supabase.
+// No localStorage is used for wishes anymore.
+const wishSubmitBtn = wishForm?.querySelector('button[type="submit"]');
+const renderedWishIds = new Set();
 let lastWishId = 0;
 let wishesLoaded = false;
 let wishesRequestBusy = false;
