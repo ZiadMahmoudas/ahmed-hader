@@ -351,7 +351,7 @@ function createFallingStars(){
 function createFallingHearts(){
   if(!fallingHearts || fallingHearts.childElementCount) return;
 
-  const count = window.matchMedia('(max-width: 760px)').matches ? 3 : 5;
+  const count = window.matchMedia('(max-width: 760px)').matches ? 6 : 5;
 
   for(let i = 0; i < count; i += 1){
     const heart = document.createElement('i');
@@ -380,7 +380,7 @@ function seedSparkEmitter(emitter, side = 'left'){
 
   const isMobile = window.matchMedia('(max-width: 760px)').matches;
   // A richer spark density, but still light enough for phones.
-  const count = isMobile ? 26 : 38;
+  const count = isMobile ? 42 : 38;
   const sparkTypes = ['spark--dot','spark--streak','spark--dot','spark--star','spark--streak','spark--dot'];
 
   for(let i = 0; i < count; i += 1){

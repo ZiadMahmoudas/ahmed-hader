@@ -2358,3 +2358,49 @@ footer.dev-footer .dev-credit{
     min-height:44px!important;
   }
 }
+
+
+/* =========================
+   V29 — mobile hearts + fireworks like desktop
+   ========================= */
+@media(max-width:760px){
+  /* Keep both decorative layers active on phones. */
+  .falling-hearts,
+  .falling-stars,
+  .twinkle-stars,
+  .spark-emitter--left,
+  .spark-emitter--right{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  /* More visible hearts on mobile, closer to the desktop mood. */
+  .falling-heart{
+    --heart-size: 13px;
+    filter:drop-shadow(0 5px 10px rgba(92,52,38,.12))!important;
+  }
+
+  /* Stronger side fountains on phones without going too heavy. */
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-98px!important;
+    height:58vh!important;
+    width:68vw!important;
+    overflow:visible!important;
+  }
+  .spark.left{left:10px!important;bottom:-10px!important;}
+  .spark.right{right:10px!important;bottom:-10px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{
+    width:94px!important;
+    height:70px!important;
+    bottom:-12px!important;
+    opacity:.18!important;
+  }
+
+  /* Let the spark pieces breathe a bit more visually on small screens. */
+  .spark{
+    filter:drop-shadow(0 0 8px rgba(255,231,190,.34))!important;
+  }
+}
