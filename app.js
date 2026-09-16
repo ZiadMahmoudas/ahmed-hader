@@ -1,5 +1,5 @@
 const CONFIG = {
-  names: "Ahmed & Hadder",
+  names: "Ahmed & Hadeer",
   dateISO: "2026-12-30T19:00:00+02:00",
   venue: "Le Ciel Hotel - Lailaty Hall",
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
@@ -14,7 +14,7 @@ const SUPABASE_CONFIG = {
   url: "https://clkgajwnhppwnkzemxgi.supabase.co",
   key: "sb_publishable_5Mcd8Aj5t376Uu1A9E0whQ_c_dTrbR7",
   table: "wedding_wishes",
-  eventSlug: "ahmed-hadder",
+  eventSlug: "ahmed-hadeer",
   pollMs: 3000,
   maxRows: 100
 };
