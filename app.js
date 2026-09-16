@@ -5,8 +5,8 @@ const CONFIG = {
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Le+Ciel+Hotel+Lailaty+Hall",
   autoScroll: true,
   autoScrollStartDelay: 4200,
-  autoScrollPixelsPerSecond: 158,
-  autoScrollResumeDelay: 780,
+  autoScrollPixelsPerSecond: 148,
+  autoScrollResumeDelay: 950,
   autoScrollLoopDuration: 900
 };
 
@@ -32,6 +32,13 @@ const calendarBtn = document.getElementById('calendarBtn');
 const wishForm = document.getElementById('wishForm');
 const wishName = document.getElementById('wishName');
 const wishMessage = document.getElementById('wishMessage');
+const petalRain = document.getElementById('petalRain');
+const celebrationFx = document.getElementById('celebrationFx');
+const twinkleStars = document.getElementById('twinkleStars');
+const fallingStars = document.getElementById('fallingStars');
+const fallingHearts = document.getElementById('fallingHearts');
+const sparkLeft = document.getElementById('sparkLeft');
+const sparkRight = document.getElementById('sparkRight');
 
 let opened = false;
 let autoScrollEnabled = CONFIG.autoScroll;
@@ -39,7 +46,8 @@ let autoScrollActive = false;
 let autoScrollLooping = false;
 let autoScrollRAF = null;
 let autoScrollLastTs = 0;
-let autoScrollCarry = 0;
+let autoScrollPosition = 0;
+let autoScrollMax = 0;
 let autoScrollResumeTimer = null;
 let userCanInterrupt = false;
 let toastTimer = null;
@@ -89,34 +97,65 @@ function cancelAutoRAF(){
   autoScrollRAF = null;
 }
 
+function setAutoScrollingClass(active){
+  document.documentElement.classList.toggle('cinematic-auto-scroll', !!active);
+  document.body.classList.toggle('cinematic-auto-scroll', !!active);
+}
+
+function getScrollElement(){
+  return document.scrollingElement || document.documentElement;
+}
+
+function syncAutoScrollMetrics(){
+  const scroller = getScrollElement();
+  autoScrollPosition = scroller.scrollTop;
+  autoScrollMax = Math.max(0, scroller.scrollHeight - window.innerHeight);
+}
+
 function startAutoScroll(){
-  if(!opened || !autoScrollEnabled || autoScrollLooping || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(
+    !opened ||
+    !autoScrollEnabled ||
+    autoScrollLooping ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) return;
 
   clearTimeout(autoScrollResumeTimer);
   cancelAutoRAF();
+
+  const scroller = getScrollElement();
+  syncAutoScrollMetrics();
+
   autoScrollActive = true;
+  setAutoScrollingClass(true);
   autoScrollLastTs = performance.now();
-  autoScrollCarry = 0;
 
   const tick = (ts) => {
-    if(!autoScrollActive || !autoScrollEnabled) return;
+    if(!autoScrollActive || !autoScrollEnabled){
+      setAutoScrollingClass(false);
+      return;
+    }
 
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    if(max > 0 && window.scrollY >= max - 4){
+    // Clamp long frames so a busy frame never creates a visible jump.
+    const dt = Math.min(32, Math.max(0, ts - autoScrollLastTs));
+    autoScrollLastTs = ts;
+
+    // Keep our own floating-point position. This avoids the old 2px/3px
+    // alternating integer steps that looked like a small shake.
+    autoScrollPosition += (CONFIG.autoScrollPixelsPerSecond * dt) / 1000;
+
+    // Re-measure occasionally because comments/content may change page height.
+    if(ts % 700 < 35){
+      autoScrollMax = Math.max(0, scroller.scrollHeight - window.innerHeight);
+    }
+
+    if(autoScrollMax > 0 && autoScrollPosition >= autoScrollMax - 1){
+      scroller.scrollTop = autoScrollMax;
       restartFromTop();
       return;
     }
 
-    const dt = Math.min(50, Math.max(0, ts - autoScrollLastTs));
-    autoScrollLastTs = ts;
-    autoScrollCarry += (CONFIG.autoScrollPixelsPerSecond * dt) / 1000;
-
-    const step = Math.floor(autoScrollCarry);
-    if(step >= 1){
-      window.scrollBy(0, step);
-      autoScrollCarry -= step;
-    }
-
+    scroller.scrollTop = autoScrollPosition;
     autoScrollRAF = requestAnimationFrame(tick);
   };
 
@@ -126,6 +165,7 @@ function startAutoScroll(){
 function pauseAutoScrollForUser(delay = CONFIG.autoScrollResumeDelay){
   if(!autoScrollEnabled || autoScrollLooping) return;
   autoScrollActive = false;
+  setAutoScrollingClass(false);
   cancelAutoRAF();
   clearTimeout(autoScrollResumeTimer);
 
@@ -140,31 +180,41 @@ function easeInOutCubic(t){
 
 function restartFromTop(){
   if(autoScrollLooping || !autoScrollEnabled) return;
+
   autoScrollLooping = true;
   autoScrollActive = false;
   cancelAutoRAF();
+  setAutoScrollingClass(true);
 
-  const startY = window.scrollY;
-  const duration = CONFIG.autoScrollLoopDuration;
+  const scroller = getScrollElement();
+  const startY = scroller.scrollTop;
+  const duration = Math.max(1050, CONFIG.autoScrollLoopDuration);
   const startedAt = performance.now();
 
   const rewind = (ts) => {
     if(!autoScrollEnabled){
       autoScrollLooping = false;
+      setAutoScrollingClass(false);
       return;
     }
+
     const p = Math.min(1, (ts - startedAt) / duration);
     const eased = easeInOutCubic(p);
-    window.scrollTo(0, Math.round(startY * (1 - eased)));
+
+    // Direct scrollTop avoids fighting html{scroll-behavior:smooth}.
+    scroller.scrollTop = startY * (1 - eased);
+
     if(p < 1){
       autoScrollRAF = requestAnimationFrame(rewind);
     }else{
       autoScrollRAF = null;
       autoScrollLooping = false;
-      window.scrollTo(0, 0);
+      scroller.scrollTop = 0;
+      autoScrollPosition = 0;
+
       setTimeout(() => {
         if(autoScrollEnabled) startAutoScroll();
-      }, 350);
+      }, 650);
     }
   };
 
@@ -178,6 +228,8 @@ openInvite.addEventListener('click', () => {
   intro.classList.add('opening');
   // Start the local song inside the user gesture so browsers allow sound.
   startWeddingAudio();
+  startPetalRain();
+  startCelebrationFx();
 
   setTimeout(() => {
     document.body.classList.remove('locked');
@@ -201,6 +253,7 @@ let interactionResumeTimer = null;
 function registerManualInteraction(delay = CONFIG.autoScrollResumeDelay){
   if(!userCanInterrupt || !autoScrollEnabled || autoScrollLooping) return;
   autoScrollActive = false;
+  setAutoScrollingClass(false);
   cancelAutoRAF();
   clearTimeout(autoScrollResumeTimer);
   clearTimeout(interactionResumeTimer);
@@ -229,6 +282,7 @@ wishForm.addEventListener('focusin', () => {
   clearTimeout(autoScrollResumeTimer);
   clearTimeout(interactionResumeTimer);
   autoScrollActive = false;
+  setAutoScrollingClass(false);
   cancelAutoRAF();
 });
 
@@ -239,6 +293,183 @@ wishForm.addEventListener('focusout', () => {
     if(!wishForm.contains(document.activeElement)) startAutoScroll();
   }, 2300);
 });
+
+// Decorative stars + side sparklers.
+// Built with transform-only animation so the cinematic scroll stays smooth.
+function createTwinkleStars(){
+  if(!twinkleStars || twinkleStars.childElementCount) return;
+
+  const count = window.matchMedia('(max-width: 760px)').matches ? 8 : 13;
+
+  for(let i = 0; i < count; i += 1){
+    const star = document.createElement('i');
+    const x = 7 + Math.random() * 86;
+    const y = 5 + Math.random() * 45;
+    const size = 8 + Math.random() * 11;
+    const delay = Math.random() * 4.2;
+    const duration = 2.3 + Math.random() * 2.4;
+    const drift = -7 + Math.random() * 14;
+
+    star.className = 'twinkle-star';
+    star.style.setProperty('--x', `${x}vw`);
+    star.style.setProperty('--y', `${y}vh`);
+    star.style.setProperty('--size', `${size}px`);
+    star.style.setProperty('--delay', `${delay}s`);
+    star.style.setProperty('--duration', `${duration}s`);
+    star.style.setProperty('--drift', `${drift}px`);
+    twinkleStars.appendChild(star);
+  }
+}
+
+function createFallingStars(){
+  if(!fallingStars || fallingStars.childElementCount) return;
+
+  const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 8;
+
+  for(let i = 0; i < count; i += 1){
+    const star = document.createElement('i');
+    const x = 8 + Math.random() * 84;
+    const drift = -34 + Math.random() * 68;
+    const duration = 10 + Math.random() * 5;
+    const delay = -(Math.random() * duration);
+    const size = 9 + Math.random() * 9;
+    const spin = -20 + Math.random() * 40;
+
+    star.className = i % 3 === 0 ? 'falling-star warm' : 'falling-star gold';
+    star.style.setProperty('--x', `${x}vw`);
+    star.style.setProperty('--drift', `${drift}px`);
+    star.style.setProperty('--drift-35', `${drift * .35}px`);
+    star.style.setProperty('--drift-neg-20', `${drift * -.20}px`);
+    star.style.setProperty('--duration', `${duration}s`);
+    star.style.setProperty('--delay', `${delay}s`);
+    star.style.setProperty('--star-size', `${size}px`);
+    star.style.setProperty('--spin', `${spin}deg`);
+    fallingStars.appendChild(star);
+  }
+}
+
+function createFallingHearts(){
+  if(!fallingHearts || fallingHearts.childElementCount) return;
+
+  const count = window.matchMedia('(max-width: 760px)').matches ? 3 : 5;
+
+  for(let i = 0; i < count; i += 1){
+    const heart = document.createElement('i');
+    const x = 8 + Math.random() * 84;
+    const drift = -38 + Math.random() * 76;
+    const duration = 9.5 + Math.random() * 5.5;
+    const delay = -(Math.random() * duration);
+    const size = 10 + Math.random() * 9;
+    const spin = -24 + Math.random() * 48;
+
+    heart.className = i % 4 === 0 ? 'falling-heart gold' : 'falling-heart wine';
+    heart.style.setProperty('--x', `${x}vw`);
+    heart.style.setProperty('--drift', `${drift}px`);
+    heart.style.setProperty('--drift-35', `${drift * .35}px`);
+    heart.style.setProperty('--drift-neg-20', `${drift * -.20}px`);
+    heart.style.setProperty('--duration', `${duration}s`);
+    heart.style.setProperty('--delay', `${delay}s`);
+    heart.style.setProperty('--heart-size', `${size}px`);
+    heart.style.setProperty('--spin', `${spin}deg`);
+    fallingHearts.appendChild(heart);
+  }
+}
+
+function seedSparkEmitter(emitter, side = 'left'){
+  if(!emitter || emitter.childElementCount) return;
+
+  const isMobile = window.matchMedia('(max-width: 760px)').matches;
+  // A richer spark density, but still light enough for phones.
+  const count = isMobile ? 26 : 38;
+  const sparkTypes = ['spark--dot','spark--streak','spark--dot','spark--star','spark--streak','spark--dot'];
+
+  for(let i = 0; i < count; i += 1){
+    const spark = document.createElement('i');
+    const duration = (isMobile ? 1.05 : .96) + Math.random() * (isMobile ? 1.05 : 1.12);
+    // Negative delay means the fountain is already alive the instant the invitation opens.
+    const delay = -(Math.random() * duration);
+    // Stronger vertical lift, so the shower clearly rises from under the viewport like sparklers.
+    const rise = (isMobile ? 175 : 225) + Math.random() * (isMobile ? 150 : 185);
+    // Narrower spread than before, so the motion reads more upward and less diagonal.
+    const spread = (isMobile ? 10 : 12) + Math.random() * (isMobile ? 68 : 95);
+    const size = 2.2 + Math.random() * (isMobile ? 4.6 : 5.8);
+    const rotate = -19 + Math.random() * 38;
+    const originOffset = Math.random() * (isMobile ? 25 : 46);
+    const trail = 8 + Math.random() * 20;
+    const type = sparkTypes[i % sparkTypes.length];
+
+    spark.className = `spark ${side} ${type}`;
+    spark.style.setProperty('--delay', `${delay}s`);
+    spark.style.setProperty('--duration', `${duration}s`);
+    spark.style.setProperty('--rise-neg-62', `${rise * -.62}px`);
+    spark.style.setProperty('--rise-neg-100', `${rise * -1}px`);
+    spark.style.setProperty('--rise-neg-112', `${rise * -1.12}px`);
+    spark.style.setProperty('--spread-55', `${spread * .55}px`);
+    spark.style.setProperty('--spread-100', `${spread}px`);
+    spark.style.setProperty('--spread-110', `${spread * 1.10}px`);
+    spark.style.setProperty('--spread-neg-55', `${spread * -.55}px`);
+    spark.style.setProperty('--spread-neg-100', `${spread * -1}px`);
+    spark.style.setProperty('--spread-neg-110', `${spread * -1.10}px`);
+    spark.style.setProperty('--size', `${size}px`);
+    spark.style.setProperty('--rotate', `${rotate}deg`);
+    spark.style.setProperty('--origin-offset', `${originOffset}px`);
+    spark.style.setProperty('--trail', `${trail}px`);
+    spark.style.setProperty('--trail-short', `${trail * .55}px`);
+    spark.style.setProperty('--streak-w', `${Math.max(2, size * .42)}px`);
+    spark.style.setProperty('--streak-h', `${size * 2.05}px`);
+    spark.style.setProperty('--star-size', `${size * 1.35}px`);
+    emitter.appendChild(spark);
+  }
+}
+
+function createCelebrationFx(){
+  createTwinkleStars();
+  createFallingStars();
+  createFallingHearts();
+  seedSparkEmitter(sparkLeft, 'left');
+  seedSparkEmitter(sparkRight, 'right');
+}
+
+function startCelebrationFx(){
+  createCelebrationFx();
+  celebrationFx?.classList.add('active');
+}
+
+// Premium falling petals — lightweight transform-only animation.
+// Created once after opening, so the landing screen stays fast.
+function createPetalRain(){
+  if(!petalRain || petalRain.childElementCount) return;
+
+  const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 8;
+  const palettes = ['wine','blush','ivory'];
+
+  for(let i = 0; i < count; i += 1){
+    const petal = document.createElement('i');
+    const x = 3 + Math.random() * 94;
+    const drift = -70 + Math.random() * 140;
+    const duration = 8.5 + Math.random() * 7;
+    const delay = -(Math.random() * duration);
+    const size = 0.65 + Math.random() * 0.95;
+    const spin = 180 + Math.random() * 540;
+
+    petal.className = `falling-petal ${palettes[i % palettes.length]}`;
+    petal.style.setProperty('--x', `${x}vw`);
+    petal.style.setProperty('--drift', `${drift}px`);
+    petal.style.setProperty('--drift-30', `${drift * 0.30}px`);
+    petal.style.setProperty('--drift-neg-18', `${drift * -0.18}px`);
+    petal.style.setProperty('--drift-72', `${drift * 0.72}px`);
+    petal.style.setProperty('--duration', `${duration}s`);
+    petal.style.setProperty('--delay', `${delay}s`);
+    petal.style.setProperty('--scale', size.toFixed(2));
+    petal.style.setProperty('--spin', `${spin}deg`);
+    petalRain.appendChild(petal);
+  }
+}
+
+function startPetalRain(){
+  createPetalRain();
+  petalRain?.classList.add('active');
+}
 
 // Reveal animations
 const observer = new IntersectionObserver(entries => {
@@ -620,3 +851,5 @@ document.querySelectorAll('.cover-frame img').forEach(img => {
     }
   });
 });
+
+window.addEventListener('resize', () => { if(opened) syncAutoScrollMetrics(); }, {passive:true});

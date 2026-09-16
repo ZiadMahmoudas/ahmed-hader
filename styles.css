@@ -655,3 +655,1706 @@ body::before,body::after,.site::before,.site::after{display:none!important;}
   transform:none!important;
   box-shadow:none!important;
 }
+
+
+/* =========================
+   V19 — buttery auto-scroll + falling rose petals
+   ========================= */
+
+/* Programmatic rAF scrolling must never fight CSS smooth scrolling. */
+html{scroll-behavior:auto!important;}
+html.cinematic-auto-scroll,
+body.cinematic-auto-scroll{scroll-behavior:auto!important;}
+
+/* The old floating cover animation was moving vertically while the page was
+   also moving vertically, which visually reads as a shake. Keep only the reveal. */
+.site.ready .cover-frame{
+  animation:coverReveal .95s cubic-bezier(.2,.8,.2,1) both!important;
+  transform:translate3d(0,0,0);
+}
+.cover-frame{
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transform:translateZ(0);
+}
+
+/* Stabilize expensive fixed/decorative layers during cinematic scrolling. */
+.cover-floral,
+.intro-floral,
+.player.local-audio-player,
+.petal-rain{
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transform:translateZ(0);
+}
+
+/* Petals stay above the artwork but below controls. */
+.petal-rain{
+  position:fixed;
+  inset:0;
+  z-index:170;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .8s ease;
+  contain:strict;
+}
+.petal-rain.active{opacity:1;}
+
+.falling-petal{
+  --x:50vw;
+  --drift:20px;
+  --duration:12s;
+  --delay:0s;
+  --scale:1;
+  --spin:420deg;
+
+  position:absolute;
+  top:-9vh;
+  left:var(--x);
+  width:17px;
+  height:12px;
+  border-radius:75% 15% 72% 22%;
+  opacity:.72;
+  transform-origin:65% 70%;
+  will-change:transform,opacity;
+  animation:petalFall var(--duration) linear var(--delay) infinite;
+  box-shadow:0 4px 12px rgba(89,49,35,.08);
+}
+.falling-petal::after{
+  content:"";
+  position:absolute;
+  width:55%;
+  height:1px;
+  left:22%;
+  top:52%;
+  background:rgba(255,255,255,.30);
+  transform:rotate(-18deg);
+  border-radius:999px;
+}
+.falling-petal.wine{
+  background:linear-gradient(135deg,#7b2630 0%,#a64e55 58%,#c9807e 100%);
+}
+.falling-petal.blush{
+  background:linear-gradient(135deg,#c98d80 0%,#e2b3a7 58%,#f0d4c9 100%);
+}
+.falling-petal.ivory{
+  background:linear-gradient(135deg,#c7a177 0%,#e4c9a5 52%,#f4e4cb 100%);
+  opacity:.58;
+}
+
+@keyframes petalFall{
+  0%{
+    transform:translate3d(0,-12vh,0) rotateX(0deg) rotateZ(0deg) scale(var(--scale));
+    opacity:0;
+  }
+  8%{opacity:.72;}
+  28%{
+    transform:translate3d(var(--drift-30),28vh,0) rotateX(120deg) rotateZ(calc(var(--spin) * .28)) scale(var(--scale));
+  }
+  55%{
+    transform:translate3d(var(--drift-neg-18),58vh,0) rotateX(250deg) rotateZ(calc(var(--spin) * .56)) scale(var(--scale));
+  }
+  80%{
+    transform:translate3d(var(--drift-72),88vh,0) rotateX(410deg) rotateZ(calc(var(--spin) * .82)) scale(var(--scale));
+    opacity:.62;
+  }
+  100%{
+    transform:translate3d(var(--drift),112vh,0) rotateX(540deg) rotateZ(var(--spin)) scale(var(--scale));
+    opacity:0;
+  }
+}
+
+/* Keep controls visually on top of falling petals. */
+.player.local-audio-player{z-index:950!important;}
+.toast{z-index:1000!important;}
+.scroll-progress{z-index:980!important;}
+
+/* A little less work on mobile = smoother scroll. */
+@media(max-width:760px){
+  .falling-petal{width:14px;height:10px;opacity:.62;}
+  .cover-frame{filter:drop-shadow(0 20px 34px rgba(79,49,29,.20))!important;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .petal-rain{display:none!important;}
+}
+
+
+/* =========================
+   V20 — stars + side sparklers
+   ========================= */
+
+.celebration-fx{
+  position:fixed;
+  inset:0;
+  z-index:165;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity .8s ease;
+  contain:strict;
+}
+.celebration-fx.active{opacity:1;}
+
+.twinkle-stars,
+.spark-emitter{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.twinkle-star{
+  --x:50vw;
+  --y:12vh;
+  --size:16px;
+  --delay:0s;
+  --duration:3s;
+  --drift:0px;
+
+  position:absolute;
+  left:var(--x);
+  top:var(--y);
+  width:var(--size);
+  height:var(--size);
+  opacity:0;
+  filter:drop-shadow(0 0 10px rgba(255,226,172,.30));
+  will-change:transform, opacity;
+  animation:twinkleStar var(--duration) ease-in-out var(--delay) infinite;
+}
+
+.twinkle-star::before,
+.twinkle-star::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background:linear-gradient(180deg,#fff8e9 0%,#f2d39b 55%,#d8a25e 100%);
+  border-radius:999px;
+}
+.twinkle-star::before{
+  width:2px;
+  height:100%;
+}
+.twinkle-star::after{
+  width:100%;
+  height:2px;
+}
+.twinkle-star span{display:none;}
+.twinkle-star::marker{display:none;}
+.twinkle-star > *{display:none;}
+.twinkle-star::selection{background:transparent;}
+.twinkle-star::after{
+  box-shadow:0 0 0 0 rgba(255,255,255,0);
+}
+.twinkle-star:before,
+.twinkle-star:after{
+  box-shadow:0 0 8px rgba(255,241,216,.28);
+}
+.twinkle-star{
+  transform:translate3d(0,0,0) rotate(45deg);
+}
+.twinkle-star::before{height:100%;}
+.twinkle-star::after{width:100%;}
+
+.spark-emitter{
+  bottom:0;
+  height:100vh;
+}
+.spark-emitter--left{left:0;width:32vw;}
+.spark-emitter--right{right:0;width:32vw;}
+
+.spark-emitter::before{
+  content:"";
+  position:absolute;
+  bottom:42px;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  filter:blur(28px);
+  opacity:.18;
+}
+.spark-emitter--left::before{
+  left:-16px;
+  background:radial-gradient(circle, rgba(255,225,180,.95) 0%, rgba(248,188,120,.55) 32%, transparent 70%);
+}
+.spark-emitter--right::before{
+  right:-16px;
+  background:radial-gradient(circle, rgba(255,225,180,.95) 0%, rgba(248,188,120,.55) 32%, transparent 70%);
+}
+
+.spark{
+  --delay:0s;
+  --duration:1.9s;
+  --rise:250px;
+  --spread:70px;
+  --size:6px;
+  --rotate:0deg;
+
+  position:absolute;
+  bottom:22px;
+  width:var(--size);
+  height:calc(var(--size) * 1.65);
+  border-radius:999px 999px 999px 999px;
+  opacity:0;
+  will-change:transform, opacity;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,.95) 0 18%, rgba(255,251,240,.92) 19% 29%, transparent 30%),
+    linear-gradient(180deg, rgba(255,247,220,.98) 0%, rgba(244,193,111,.95) 52%, rgba(179,87,38,.80) 100%);
+  box-shadow:
+    0 0 8px rgba(255,239,188,.34),
+    0 0 18px rgba(255,205,115,.22);
+}
+.spark.left{
+  left:24px;
+  animation:sparkBurstLeft var(--duration) ease-out var(--delay) infinite;
+}
+.spark.right{
+  right:24px;
+  animation:sparkBurstRight var(--duration) ease-out var(--delay) infinite;
+}
+
+@keyframes twinkleStar{
+  0%,100%{
+    opacity:.14;
+    transform:translate3d(0,0,0) rotate(45deg) scale(.72);
+  }
+  35%{
+    opacity:.95;
+    transform:translate3d(var(--drift),-4px,0) rotate(45deg) scale(1.02);
+  }
+  65%{
+    opacity:.42;
+    transform:translate3d(calc(var(--drift) * -.45),3px,0) rotate(45deg) scale(.84);
+  }
+}
+
+@keyframes sparkBurstLeft{
+  0%{
+    opacity:0;
+    transform:translate3d(0,0,0) rotate(18deg) scale(.65);
+  }
+  12%{opacity:1;}
+  75%{
+    opacity:.88;
+    transform:translate3d(var(--spread), calc(var(--rise) * -1), 0) rotate(calc(28deg + var(--rotate))) scale(1);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(calc(var(--spread) * 1.15), calc(var(--rise) * -1.16), 0) rotate(calc(38deg + var(--rotate))) scale(.82);
+  }
+}
+
+@keyframes sparkBurstRight{
+  0%{
+    opacity:0;
+    transform:translate3d(0,0,0) rotate(-18deg) scale(.65);
+  }
+  12%{opacity:1;}
+  75%{
+    opacity:.88;
+    transform:translate3d(calc(var(--spread) * -1), calc(var(--rise) * -1), 0) rotate(calc(-28deg + var(--rotate))) scale(1);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(calc(var(--spread) * -1.15), calc(var(--rise) * -1.16), 0) rotate(calc(-38deg + var(--rotate))) scale(.82);
+  }
+}
+
+/* Keep all celebration fx behind the audio/player and toasts. */
+.celebration-fx,
+.petal-rain{z-index:165!important;}
+.player.local-audio-player{z-index:950!important;}
+.toast{z-index:1000!important;}
+
+@media(max-width:760px){
+  .twinkle-star{filter:drop-shadow(0 0 7px rgba(255,226,172,.24));}
+  .spark-emitter--left,
+  .spark-emitter--right{width:40vw;}
+  .spark-emitter::before{width:84px;height:84px;bottom:28px;opacity:.14;}
+  .spark.left{left:16px;}
+  .spark.right{right:16px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .celebration-fx{display:none!important;}
+}
+
+
+/* =========================
+   V21 — real stars + falling hearts + LEFT spark fountain only
+   ========================= */
+
+/* Hide V20 right-side emitter rules if any old cached DOM survives. */
+.spark-emitter--right{display:none!important;}
+
+/* Real five-point stars, not X shapes. */
+.twinkle-star{
+  position:absolute;
+  left:var(--x);
+  top:var(--y);
+  width:var(--size);
+  height:var(--size);
+  opacity:0;
+  background:linear-gradient(135deg,#fff8da 0%,#f0c876 52%,#c7903d 100%);
+  clip-path:polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 94%,
+    50% 72%,
+    21% 94%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  filter:drop-shadow(0 0 5px rgba(255,229,166,.40));
+  will-change:transform,opacity;
+  animation:realStarTwinkle var(--duration) ease-in-out var(--delay) infinite;
+}
+.twinkle-star::before,
+.twinkle-star::after{display:none!important;}
+
+@keyframes realStarTwinkle{
+  0%,100%{
+    opacity:.12;
+    transform:translate3d(0,0,0) rotate(-10deg) scale(.72);
+  }
+  42%{
+    opacity:.92;
+    transform:translate3d(var(--drift),-5px,0) rotate(8deg) scale(1.12);
+  }
+  68%{
+    opacity:.42;
+    transform:translate3d(calc(var(--drift) * -.35),2px,0) rotate(-4deg) scale(.88);
+  }
+}
+
+/* Falling hearts: subtle wedding accent, kept sparse so it stays elegant. */
+.falling-hearts{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.falling-heart{
+  --x:50vw;
+  --drift:0px;
+  --duration:11s;
+  --delay:0s;
+  --heart-size:16px;
+  --spin:0deg;
+
+  position:absolute;
+  top:-8vh;
+  left:var(--x);
+  width:var(--heart-size);
+  height:var(--heart-size);
+  opacity:0;
+  transform:rotate(45deg);
+  border-radius:3px 0 5px 0;
+  will-change:transform,opacity;
+  animation:heartFall var(--duration) linear var(--delay) infinite;
+  filter:drop-shadow(0 5px 9px rgba(92,52,38,.10));
+}
+
+.falling-heart::before,
+.falling-heart::after{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:inherit;
+}
+.falling-heart::before{left:-50%;top:0;}
+.falling-heart::after{left:0;top:-50%;}
+
+.falling-heart.wine{
+  background:linear-gradient(135deg,#772f3b,#b55f67 62%,#d99b98);
+}
+.falling-heart.gold{
+  background:linear-gradient(135deg,#b98445,#e1bd7d 62%,#f0d7a7);
+  opacity:.62;
+}
+
+@keyframes heartFall{
+  0%{
+    opacity:0;
+    transform:translate3d(0,-10vh,0) rotate(35deg) scale(.72);
+  }
+  8%{opacity:.62;}
+  32%{
+    transform:translate3d(calc(var(--drift) * .35),30vh,0) rotate(calc(45deg + var(--spin))) scale(.95);
+  }
+  62%{
+    transform:translate3d(calc(var(--drift) * -.22),64vh,0) rotate(calc(45deg - var(--spin))) scale(.88);
+  }
+  86%{opacity:.54;}
+  100%{
+    opacity:0;
+    transform:translate3d(var(--drift),112vh,0) rotate(calc(45deg + var(--spin))) scale(.76);
+  }
+}
+
+/* One proper fountain from bottom-left shooting inward. */
+.spark-emitter--left{
+  position:absolute;
+  left:0!important;
+  right:auto!important;
+  bottom:0!important;
+  width:min(42vw,560px)!important;
+  height:72vh!important;
+  overflow:visible!important;
+}
+
+.spark-emitter--left::before{
+  left:-12px!important;
+  right:auto!important;
+  bottom:20px!important;
+  width:145px!important;
+  height:110px!important;
+  background:radial-gradient(circle,rgba(255,235,191,.92) 0%,rgba(237,168,82,.42) 32%,transparent 72%)!important;
+  opacity:.22!important;
+  filter:blur(26px)!important;
+}
+
+.spark.left{
+  left:28px!important;
+  right:auto!important;
+  bottom:18px!important;
+  transform-origin:bottom center;
+  animation:sparkBurstLeftV21 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+
+@keyframes sparkBurstLeftV21{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) rotate(14deg) scale(.52);
+  }
+  10%{opacity:1;}
+  46%{
+    opacity:.98;
+    transform:translate3d(
+      calc(var(--spread) * .55),
+      calc(var(--rise) * -.62),
+      0
+    ) rotate(calc(25deg + var(--rotate))) scale(1);
+  }
+  82%{
+    opacity:.70;
+    transform:translate3d(
+      var(--spread),
+      calc(var(--rise) * -1),
+      0
+    ) rotate(calc(38deg + var(--rotate))) scale(.82);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(
+      calc(var(--spread) * 1.10),
+      calc(var(--rise) * -1.12),
+      0
+    ) rotate(calc(48deg + var(--rotate))) scale(.62);
+  }
+}
+
+@media(max-width:760px){
+  .falling-heart{--heart-size:12px;}
+  .spark-emitter--left{width:62vw!important;height:62vh!important;}
+  .spark.left{left:14px!important;}
+  .spark-emitter--left::before{width:100px!important;height:80px!important;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .falling-hearts{display:none!important;}
+}
+
+
+/* =========================
+   V22 — side sparks on both sides + drifting stars instead of hearts
+   ========================= */
+
+/* Replace hearts layer with elegant falling stars */
+.falling-stars{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.falling-star{
+  --x:50vw;
+  --drift:0px;
+  --duration:11s;
+  --delay:0s;
+  --star-size:16px;
+  --spin:0deg;
+
+  position:absolute;
+  top:-8vh;
+  left:var(--x);
+  width:var(--star-size);
+  height:var(--star-size);
+  opacity:0;
+  clip-path:polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 94%,
+    50% 72%,
+    21% 94%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  will-change:transform,opacity;
+  animation:fallingStarDrift var(--duration) linear var(--delay) infinite;
+  filter:drop-shadow(0 5px 10px rgba(92,52,38,.10));
+}
+.falling-star.gold{
+  background:linear-gradient(135deg,#d1a55b,#f1d08c 62%,#fff0c8);
+  opacity:.78;
+}
+.falling-star.warm{
+  background:linear-gradient(135deg,#c88c65,#efc091 62%,#fff2dc);
+  opacity:.60;
+}
+
+@keyframes fallingStarDrift{
+  0%{
+    opacity:0;
+    transform:translate3d(0,-10vh,0) rotate(-10deg) scale(.72);
+  }
+  9%{opacity:.72;}
+  35%{
+    transform:translate3d(calc(var(--drift) * .35),31vh,0) rotate(calc(12deg + var(--spin))) scale(.96);
+  }
+  65%{
+    transform:translate3d(calc(var(--drift) * -.20),65vh,0) rotate(calc(-8deg + var(--spin))) scale(.84);
+  }
+  88%{opacity:.48;}
+  100%{
+    opacity:0;
+    transform:translate3d(var(--drift),112vh,0) rotate(calc(18deg + var(--spin))) scale(.72);
+  }
+}
+
+/* Keep the true star look everywhere */
+.twinkle-star{
+  clip-path:polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 94%,
+    50% 72%,
+    21% 94%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  )!important;
+  background:linear-gradient(135deg,#fff8da 0%,#f0c876 52%,#c7903d 100%)!important;
+  transform-origin:center center;
+  filter:drop-shadow(0 0 5px rgba(255,229,166,.40))!important;
+}
+.twinkle-star::before,
+.twinkle-star::after{display:none!important;}
+
+/* Two fountains, both shooting inward and upward */
+.spark-emitter--left,
+.spark-emitter--right{
+  position:absolute;
+  bottom:0!important;
+  width:min(42vw,560px)!important;
+  height:72vh!important;
+  overflow:visible!important;
+}
+.spark-emitter--left{
+  left:0!important;
+  right:auto!important;
+}
+.spark-emitter--right{
+  right:0!important;
+  left:auto!important;
+  display:block!important;
+}
+
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  content:"";
+  position:absolute;
+  bottom:20px!important;
+  width:145px!important;
+  height:110px!important;
+  opacity:.22!important;
+  filter:blur(26px)!important;
+}
+.spark-emitter--left::before{
+  left:-12px!important;
+  background:radial-gradient(circle,rgba(255,235,191,.92) 0%,rgba(237,168,82,.42) 32%,transparent 72%)!important;
+}
+.spark-emitter--right::before{
+  right:-12px!important;
+  background:radial-gradient(circle,rgba(255,235,191,.92) 0%,rgba(237,168,82,.42) 32%,transparent 72%)!important;
+}
+
+.spark.left{
+  left:28px!important;
+  right:auto!important;
+  bottom:18px!important;
+  transform-origin:bottom center;
+  animation:sparkBurstLeftV22 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+.spark.right{
+  right:28px!important;
+  left:auto!important;
+  bottom:18px!important;
+  transform-origin:bottom center;
+  animation:sparkBurstRightV22 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+
+@keyframes sparkBurstLeftV22{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) rotate(14deg) scale(.52);
+  }
+  10%{opacity:1;}
+  46%{
+    opacity:.98;
+    transform:translate3d(
+      calc(var(--spread) * .55),
+      calc(var(--rise) * -.62),
+      0
+    ) rotate(calc(25deg + var(--rotate))) scale(1);
+  }
+  82%{
+    opacity:.70;
+    transform:translate3d(
+      var(--spread),
+      calc(var(--rise) * -1),
+      0
+    ) rotate(calc(38deg + var(--rotate))) scale(.82);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(
+      calc(var(--spread) * 1.10),
+      calc(var(--rise) * -1.12),
+      0
+    ) rotate(calc(48deg + var(--rotate))) scale(.62);
+  }
+}
+
+@keyframes sparkBurstRightV22{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) rotate(-14deg) scale(.52);
+  }
+  10%{opacity:1;}
+  46%{
+    opacity:.98;
+    transform:translate3d(
+      calc(var(--spread) * -.55),
+      calc(var(--rise) * -.62),
+      0
+    ) rotate(calc(-25deg + var(--rotate))) scale(1);
+  }
+  82%{
+    opacity:.70;
+    transform:translate3d(
+      calc(var(--spread) * -1),
+      calc(var(--rise) * -1),
+      0
+    ) rotate(calc(-38deg + var(--rotate))) scale(.82);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(
+      calc(var(--spread) * -1.10),
+      calc(var(--rise) * -1.12),
+      0
+    ) rotate(calc(-48deg + var(--rotate))) scale(.62);
+  }
+}
+
+@media(max-width:760px){
+  .spark-emitter--left,
+  .spark-emitter--right{width:62vw!important;height:62vh!important;}
+  .spark.left{left:14px!important;}
+  .spark.right{right:14px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{width:100px!important;height:80px!important;}
+  .falling-star{--star-size:12px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .falling-stars{display:none!important;}
+}
+
+
+/* =========================
+   V23 — lower corner fountains + hearts on desktop/mobile
+   ========================= */
+
+/* Move both spark origins further DOWN, like the marked reference. */
+.spark-emitter--left,
+.spark-emitter--right{
+  bottom:-78px!important;
+  height:66vh!important;
+  width:min(40vw,540px)!important;
+  overflow:visible!important;
+}
+.spark.left{
+  left:24px!important;
+  bottom:0!important;
+}
+.spark.right{
+  right:24px!important;
+  bottom:0!important;
+}
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  bottom:6px!important;
+}
+
+/* Robust spark math: values are precomputed in JS, so no CSS multiplication. */
+@keyframes sparkBurstLeftV23{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) rotate(12deg) scale(.50);
+  }
+  10%{opacity:1;}
+  46%{
+    opacity:.98;
+    transform:translate3d(var(--spread-55),var(--rise-neg-62),0)
+      rotate(calc(23deg + var(--rotate))) scale(1);
+  }
+  82%{
+    opacity:.72;
+    transform:translate3d(var(--spread-100),var(--rise-neg-100),0)
+      rotate(calc(36deg + var(--rotate))) scale(.82);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-110),var(--rise-neg-112),0)
+      rotate(calc(46deg + var(--rotate))) scale(.60);
+  }
+}
+@keyframes sparkBurstRightV23{
+  0%{
+    opacity:0;
+    transform:translate3d(0,4px,0) rotate(-12deg) scale(.50);
+  }
+  10%{opacity:1;}
+  46%{
+    opacity:.98;
+    transform:translate3d(var(--spread-neg-55),var(--rise-neg-62),0)
+      rotate(calc(-23deg + var(--rotate))) scale(1);
+  }
+  82%{
+    opacity:.72;
+    transform:translate3d(var(--spread-neg-100),var(--rise-neg-100),0)
+      rotate(calc(-36deg + var(--rotate))) scale(.82);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-neg-110),var(--rise-neg-112),0)
+      rotate(calc(-46deg + var(--rotate))) scale(.60);
+  }
+}
+.spark.left{
+  animation:sparkBurstLeftV23 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+.spark.right{
+  animation:sparkBurstRightV23 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+
+/* Keep falling stars light and elegant. */
+@keyframes fallingStarDrift{
+  0%{opacity:0;transform:translate3d(0,-10vh,0) rotate(-10deg) scale(.72);}
+  9%{opacity:.70;}
+  35%{transform:translate3d(var(--drift-35),31vh,0) rotate(calc(12deg + var(--spin))) scale(.96);}
+  65%{transform:translate3d(var(--drift-neg-20),65vh,0) rotate(calc(-8deg + var(--spin))) scale(.84);}
+  88%{opacity:.46;}
+  100%{opacity:0;transform:translate3d(var(--drift),112vh,0) rotate(calc(18deg + var(--spin))) scale(.72);}
+}
+
+/* Hearts are back, mixed with stars — subtle, not crowded. */
+.falling-hearts{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.falling-heart{
+  position:absolute;
+  top:-8vh;
+  left:var(--x);
+  width:var(--heart-size);
+  height:var(--heart-size);
+  opacity:0;
+  background:#9a4b57;
+  transform:rotate(45deg);
+  border-radius:3px 0 5px 0;
+  will-change:transform,opacity;
+  animation:heartFallV23 var(--duration) linear var(--delay) infinite;
+  filter:drop-shadow(0 4px 8px rgba(92,52,38,.10));
+}
+.falling-heart::before,
+.falling-heart::after{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:inherit;
+}
+.falling-heart::before{left:-50%;top:0;}
+.falling-heart::after{left:0;top:-50%;}
+.falling-heart.wine{
+  background:linear-gradient(135deg,#7a3341,#b65c68 62%,#d99b9c);
+}
+.falling-heart.gold{
+  background:linear-gradient(135deg,#b98445,#e1bd7d 62%,#f0d7a7);
+}
+@keyframes heartFallV23{
+  0%{opacity:0;transform:translate3d(0,-10vh,0) rotate(38deg) scale(.70);}
+  9%{opacity:.58;}
+  35%{transform:translate3d(var(--drift-35),31vh,0) rotate(calc(45deg + var(--spin))) scale(.92);}
+  65%{transform:translate3d(var(--drift-neg-20),65vh,0) rotate(calc(45deg - var(--spin))) scale(.84);}
+  88%{opacity:.48;}
+  100%{opacity:0;transform:translate3d(var(--drift),112vh,0) rotate(calc(45deg + var(--spin))) scale(.74);}
+}
+
+/* Mobile: effects remain visible, but origins sit a little less below the viewport. */
+@media(max-width:760px){
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-34px!important;
+    height:58vh!important;
+    width:70vw!important;
+  }
+  .spark.left{left:10px!important;}
+  .spark.right{right:10px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{
+    bottom:0!important;
+    width:92px!important;
+    height:72px!important;
+    opacity:.18!important;
+  }
+  .falling-heart{--heart-size:11px;}
+  .falling-star{--star-size:11px;}
+}
+
+/* Effects are decorative; keep controls on top. */
+.celebration-fx,
+.petal-rain{z-index:165!important;}
+.player.local-audio-player{z-index:950!important;}
+.toast{z-index:1000!important;}
+
+
+/* =========================
+   V24 — floral corner direction/placement polish + lower off-screen fountains
+   ========================= */
+
+/* Floral corners: pull them closer to the page edges and keep the hanging direction cleaner. */
+.intro-floral{
+  width:min(24.5vw,315px)!important;
+  height:min(24.5vw,315px)!important;
+}
+.intro-floral--tl{
+  top:-26px!important;
+  left:-24px!important;
+  transform:none!important;
+  transform-origin:top left!important;
+}
+.intro-floral--tr{
+  top:-26px!important;
+  right:-24px!important;
+  transform:scaleX(-1)!important;
+  transform-origin:top right!important;
+}
+.intro-floral--bl{
+  bottom:-34px!important;
+  left:-16px!important;
+  transform:scaleX(-1)!important;
+  transform-origin:bottom left!important;
+}
+.intro-floral--br{
+  bottom:-34px!important;
+  right:-16px!important;
+  transform:none!important;
+  transform-origin:bottom right!important;
+}
+
+/* Do the same on the opened cover so all four corners feel aligned. */
+.cover-floral{
+  width:min(20.5vw,236px)!important;
+  height:min(20.5vw,236px)!important;
+}
+.cover-floral--tl{
+  top:10px!important;
+  left:12px!important;
+  transform:none!important;
+  transform-origin:top left!important;
+}
+.cover-floral--tr{
+  top:10px!important;
+  right:12px!important;
+  transform:scaleX(-1)!important;
+  transform-origin:top right!important;
+}
+.cover-floral--bl{
+  bottom:4px!important;
+  left:12px!important;
+  transform:scaleX(-1)!important;
+  transform-origin:bottom left!important;
+}
+.cover-floral--br{
+  bottom:4px!important;
+  right:12px!important;
+  transform:none!important;
+  transform-origin:bottom right!important;
+}
+
+/* Push both fountain origins further below the viewport, so they visibly rise from the bottom corners. */
+.spark-emitter--left,
+.spark-emitter--right{
+  bottom:-132px!important;
+  height:62vh!important;
+  width:min(34vw,470px)!important;
+  overflow:visible!important;
+}
+.spark-emitter--left{
+  left:0!important;
+}
+.spark-emitter--right{
+  right:0!important;
+}
+.spark.left{
+  left:20px!important;
+  bottom:-8px!important;
+}
+.spark.right{
+  right:20px!important;
+  bottom:-8px!important;
+}
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  bottom:-10px!important;
+  width:112px!important;
+  height:84px!important;
+  opacity:.16!important;
+}
+
+/* Make the visible ignition happen a little later so it feels like it starts below the screen. */
+@keyframes sparkBurstLeftV24{
+  0%{
+    opacity:0;
+    transform:translate3d(0,6px,0) rotate(12deg) scale(.46);
+  }
+  18%{opacity:.98;}
+  52%{
+    opacity:.98;
+    transform:translate3d(var(--spread-55),var(--rise-neg-62),0)
+      rotate(calc(22deg + var(--rotate))) scale(.98);
+  }
+  84%{
+    opacity:.70;
+    transform:translate3d(var(--spread-100),var(--rise-neg-100),0)
+      rotate(calc(35deg + var(--rotate))) scale(.80);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-110),var(--rise-neg-112),0)
+      rotate(calc(46deg + var(--rotate))) scale(.58);
+  }
+}
+@keyframes sparkBurstRightV24{
+  0%{
+    opacity:0;
+    transform:translate3d(0,6px,0) rotate(-12deg) scale(.46);
+  }
+  18%{opacity:.98;}
+  52%{
+    opacity:.98;
+    transform:translate3d(var(--spread-neg-55),var(--rise-neg-62),0)
+      rotate(calc(-22deg + var(--rotate))) scale(.98);
+  }
+  84%{
+    opacity:.70;
+    transform:translate3d(var(--spread-neg-100),var(--rise-neg-100),0)
+      rotate(calc(-35deg + var(--rotate))) scale(.80);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-neg-110),var(--rise-neg-112),0)
+      rotate(calc(-46deg + var(--rotate))) scale(.58);
+  }
+}
+.spark.left{
+  animation:sparkBurstLeftV24 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+.spark.right{
+  animation:sparkBurstRightV24 var(--duration) cubic-bezier(.17,.72,.32,1) var(--delay) infinite!important;
+}
+
+/* Mobile: keep them clearly starting from below, but not too far below. */
+@media(max-width:760px){
+  .intro-floral{
+    width:min(37vw,168px)!important;
+    height:min(37vw,168px)!important;
+  }
+  .intro-floral--tl{top:-16px!important;left:-16px!important;}
+  .intro-floral--tr{top:-16px!important;right:-16px!important;}
+  .intro-floral--bl{bottom:-22px!important;left:-10px!important;}
+  .intro-floral--br{bottom:-22px!important;right:-10px!important;}
+
+  .cover-floral{
+    width:min(29vw,118px)!important;
+    height:min(29vw,118px)!important;
+  }
+  .cover-floral--tl{top:8px!important;left:8px!important;}
+  .cover-floral--tr{top:8px!important;right:8px!important;}
+  .cover-floral--bl{bottom:2px!important;left:8px!important;}
+  .cover-floral--br{bottom:2px!important;right:8px!important;}
+
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-56px!important;
+    height:55vh!important;
+    width:66vw!important;
+  }
+  .spark.left{left:8px!important;bottom:-4px!important;}
+  .spark.right{right:8px!important;bottom:-4px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{
+    bottom:-6px!important;
+    width:84px!important;
+    height:62px!important;
+    opacity:.14!important;
+  }
+}
+
+
+/* =========================
+   V25 — cinematic floral framing + bottom wedding spark fountains
+   ========================= */
+
+/* Opened cover: match the premium framed composition from the approved mockup. */
+.cover{
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 50% 4%,rgba(255,255,255,.58),transparent 34%),
+    radial-gradient(circle at 50% 108%,rgba(255,248,235,.52),transparent 32%),
+    linear-gradient(145deg,#dfc6ad 0%,#ead7c5 50%,#f4e8dc 100%)!important;
+}
+.cover::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:0;right:0;bottom:-3%;
+  height:35%;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 50% 100%,rgba(255,245,226,.60),rgba(255,234,205,.18) 42%,transparent 72%);
+}
+.cover-glow{opacity:.36!important;}
+
+/* Large floral clusters hug the four screen corners, leaving the invitation clear. */
+.cover-floral{
+  z-index:1!important;
+  width:min(28vw,390px)!important;
+  height:min(28vw,390px)!important;
+  opacity:.98!important;
+  filter:drop-shadow(0 14px 30px rgba(82,51,31,.10))!important;
+}
+.cover-floral--tl{top:-32px!important;left:-26px!important;}
+.cover-floral--tr{top:-32px!important;right:-26px!important;}
+.cover-floral--bl{bottom:-38px!important;left:-24px!important;}
+.cover-floral--br{bottom:-38px!important;right:-24px!important;}
+
+/* Opening screen gets the same corner language, but slightly softer. */
+.intro-floral{
+  width:min(27vw,365px)!important;
+  height:min(27vw,365px)!important;
+  opacity:.98!important;
+}
+.intro-floral--tl{top:-34px!important;left:-28px!important;}
+.intro-floral--tr{top:-34px!important;right:-28px!important;}
+.intro-floral--bl{bottom:-42px!important;left:-24px!important;}
+.intro-floral--br{bottom:-42px!important;right:-24px!important;}
+
+/* Keep the photo invitation visually dominant and slightly lower like the reference. */
+.cover-frame{
+  z-index:3!important;
+  transform:translateY(5px);
+}
+.cover-bottom{z-index:4!important;}
+
+/* Celebration layer sits over the background/photo, but the fountain origins stay below the viewport. */
+.celebration-fx{
+  z-index:165!important;
+  overflow:hidden!important;
+}
+.spark-emitter--left,
+.spark-emitter--right{
+  bottom:-104px!important;
+  height:58vh!important;
+  width:min(36vw,520px)!important;
+  overflow:visible!important;
+}
+.spark-emitter--left{left:0!important;right:auto!important;}
+.spark-emitter--right{right:0!important;left:auto!important;display:block!important;}
+
+/* Soft ignition glow below the screen edge. */
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  bottom:8px!important;
+  width:170px!important;
+  height:105px!important;
+  opacity:.23!important;
+  filter:blur(30px)!important;
+}
+.spark-emitter--left::before{left:clamp(-18px,2vw,22px)!important;}
+.spark-emitter--right::before{right:clamp(-18px,2vw,22px)!important;}
+
+/* Dense spark particles: a mix of dots, streaks and tiny stars. */
+.spark{
+  bottom:0!important;
+  opacity:0;
+  filter:drop-shadow(0 0 8px rgba(255,225,159,.36));
+  will-change:transform,opacity;
+}
+.spark.left{
+  left:calc(clamp(24px,5vw,78px) + var(--origin-offset,0px))!important;
+  right:auto!important;
+}
+.spark.right{
+  right:calc(clamp(24px,5vw,78px) + var(--origin-offset,0px))!important;
+  left:auto!important;
+}
+.spark::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:65%;
+  width:1px;
+  height:var(--trail,15px);
+  transform:translateX(-50%);
+  transform-origin:top center;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,246,218,.72),rgba(229,166,84,.26) 48%,transparent 100%);
+}
+.spark--dot{
+  width:var(--size)!important;
+  height:var(--size)!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 38% 32%,#fffdf6 0 25%,#f7d999 30% 56%,#d69b4c 66% 100%)!important;
+  box-shadow:0 0 9px rgba(255,239,194,.52),0 0 18px rgba(235,177,91,.20)!important;
+}
+.spark--dot::after{height:var(--trail-short,8px);opacity:.45;}
+.spark--streak{
+  width:var(--streak-w,2px)!important;
+  height:var(--streak-h,10px)!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,#fffdf5 0%,#f7d28b 47%,#c67c36 100%)!important;
+  box-shadow:0 0 8px rgba(255,235,178,.48),0 0 16px rgba(229,153,67,.20)!important;
+}
+.spark--star{
+  width:var(--star-size,8px)!important;
+  height:var(--star-size,8px)!important;
+  background:linear-gradient(135deg,#fffbe9 0%,#f3cf7d 55%,#c68f3b 100%)!important;
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 94%,50% 72%,21% 94%,32% 57%,2% 35%,39% 35%)!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.spark--star::after{display:none;}
+
+/* Fan-shaped fountain. The first visible frame is already above the hidden ignition point. */
+@keyframes sparkBurstLeftV25{
+  0%{opacity:0;transform:translate3d(0,14px,0) rotate(10deg) scale(.34);}
+  8%{opacity:.95;}
+  44%{opacity:1;transform:translate3d(var(--spread-55),var(--rise-neg-62),0) rotate(calc(20deg + var(--rotate))) scale(1);}
+  78%{opacity:.76;transform:translate3d(var(--spread-100),var(--rise-neg-100),0) rotate(calc(34deg + var(--rotate))) scale(.84);}
+  100%{opacity:0;transform:translate3d(var(--spread-110),var(--rise-neg-112),0) rotate(calc(44deg + var(--rotate))) scale(.55);}
+}
+@keyframes sparkBurstRightV25{
+  0%{opacity:0;transform:translate3d(0,14px,0) rotate(-10deg) scale(.34);}
+  8%{opacity:.95;}
+  44%{opacity:1;transform:translate3d(var(--spread-neg-55),var(--rise-neg-62),0) rotate(calc(-20deg + var(--rotate))) scale(1);}
+  78%{opacity:.76;transform:translate3d(var(--spread-neg-100),var(--rise-neg-100),0) rotate(calc(-34deg + var(--rotate))) scale(.84);}
+  100%{opacity:0;transform:translate3d(var(--spread-neg-110),var(--rise-neg-112),0) rotate(calc(-44deg + var(--rotate))) scale(.55);}
+}
+.spark.left{animation:sparkBurstLeftV25 var(--duration) cubic-bezier(.14,.68,.28,1) var(--delay) infinite!important;}
+.spark.right{animation:sparkBurstRightV25 var(--duration) cubic-bezier(.14,.68,.28,1) var(--delay) infinite!important;}
+
+/* A concentrated glitter mist along the bottom makes the fountains feel richer. */
+.celebration-fx::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-26px;
+  height:150px;
+  pointer-events:none;
+  opacity:.36;
+  background:
+    radial-gradient(circle at 7% 65%,rgba(255,247,222,.86) 0 2px,transparent 3px),
+    radial-gradient(circle at 12% 36%,rgba(242,199,122,.84) 0 1.5px,transparent 2.5px),
+    radial-gradient(circle at 18% 78%,rgba(255,237,192,.78) 0 2px,transparent 3px),
+    radial-gradient(circle at 82% 72%,rgba(255,247,222,.86) 0 2px,transparent 3px),
+    radial-gradient(circle at 89% 38%,rgba(242,199,122,.84) 0 1.5px,transparent 2.5px),
+    radial-gradient(circle at 94% 68%,rgba(255,237,192,.78) 0 2px,transparent 3px);
+  background-size:84px 66px,72px 54px,92px 70px,84px 66px,72px 54px,92px 70px;
+  filter:drop-shadow(0 0 8px rgba(255,226,166,.28));
+  animation:bottomGlitterV25 2.2s linear infinite;
+}
+@keyframes bottomGlitterV25{
+  from{transform:translate3d(0,0,0);opacity:.28;}
+  50%{opacity:.48;}
+  to{transform:translate3d(0,-22px,0);opacity:.24;}
+}
+
+@media(max-width:760px){
+  .cover-floral{
+    width:min(34vw,150px)!important;
+    height:min(34vw,150px)!important;
+  }
+  .cover-floral--tl{top:-10px!important;left:-12px!important;}
+  .cover-floral--tr{top:-10px!important;right:-12px!important;}
+  .cover-floral--bl{bottom:-14px!important;left:-10px!important;}
+  .cover-floral--br{bottom:-14px!important;right:-10px!important;}
+
+  .intro-floral{
+    width:min(38vw,170px)!important;
+    height:min(38vw,170px)!important;
+  }
+  .intro-floral--tl{top:-15px!important;left:-14px!important;}
+  .intro-floral--tr{top:-15px!important;right:-14px!important;}
+  .intro-floral--bl{bottom:-20px!important;left:-12px!important;}
+  .intro-floral--br{bottom:-20px!important;right:-12px!important;}
+
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-70px!important;
+    height:48vh!important;
+    width:72vw!important;
+  }
+  .spark.left{left:calc(13px + var(--origin-offset,0px))!important;}
+  .spark.right{right:calc(13px + var(--origin-offset,0px))!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{
+    width:110px!important;
+    height:75px!important;
+    opacity:.18!important;
+  }
+  .celebration-fx::after{height:112px;opacity:.28;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .celebration-fx::after{animation:none!important;}
+}
+
+
+
+/* =========================
+   V26 — corrected floral direction + lower, more upward sparklers
+   ========================= */
+
+/* Floral corners: lock the direction so each bouquet hugs its corner like the approved reference. */
+.intro-floral--tl,
+.cover-floral--tl{
+  transform:none!important;
+}
+.intro-floral--tr,
+.cover-floral--tr{
+  transform:scaleX(-1)!important;
+}
+.intro-floral--bl,
+.cover-floral--bl{
+  transform:scaleX(-1)!important;
+}
+.intro-floral--br,
+.cover-floral--br{
+  transform:none!important;
+}
+
+.intro-floral{
+  width:min(25vw,322px)!important;
+  height:min(25vw,322px)!important;
+}
+.intro-floral--tl{top:-30px!important;left:-28px!important;}
+.intro-floral--tr{top:-30px!important;right:-28px!important;}
+.intro-floral--bl{bottom:-42px!important;left:-20px!important;}
+.intro-floral--br{bottom:-42px!important;right:-20px!important;}
+
+.cover-floral{
+  width:min(21vw,240px)!important;
+  height:min(21vw,240px)!important;
+}
+.cover-floral--tl{top:8px!important;left:10px!important;}
+.cover-floral--tr{top:8px!important;right:10px!important;}
+.cover-floral--bl{bottom:0!important;left:10px!important;}
+.cover-floral--br{bottom:0!important;right:10px!important;}
+
+/* Lower the ignition point more aggressively, so the shower clearly starts below the screen edge. */
+.spark-emitter--left,
+.spark-emitter--right{
+  bottom:-182px!important;
+  height:68vh!important;
+  width:min(33vw,440px)!important;
+  overflow:visible!important;
+}
+.spark-emitter--left{left:0!important;}
+.spark-emitter--right{right:0!important;}
+.spark.left{
+  left:16px!important;
+  bottom:-20px!important;
+  animation:sparkBurstLeftV26 var(--duration) cubic-bezier(.18,.72,.32,1) var(--delay) infinite!important;
+}
+.spark.right{
+  right:16px!important;
+  bottom:-20px!important;
+  animation:sparkBurstRightV26 var(--duration) cubic-bezier(.18,.72,.32,1) var(--delay) infinite!important;
+}
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  bottom:-26px!important;
+  width:122px!important;
+  height:96px!important;
+  opacity:.15!important;
+}
+
+/* Longer hidden startup so the ignition feels under the viewport, then a mostly-upward climb. */
+@keyframes sparkBurstLeftV26{
+  0%{
+    opacity:0;
+    transform:translate3d(0,12px,0) rotate(10deg) scale(.40);
+  }
+  24%{opacity:0;}
+  30%{opacity:.96;}
+  58%{
+    opacity:.98;
+    transform:translate3d(var(--spread-55),var(--rise-neg-62),0)
+      rotate(calc(18deg + var(--rotate))) scale(.98);
+  }
+  86%{
+    opacity:.74;
+    transform:translate3d(var(--spread-100),var(--rise-neg-100),0)
+      rotate(calc(28deg + var(--rotate))) scale(.80);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-110),var(--rise-neg-112),0)
+      rotate(calc(34deg + var(--rotate))) scale(.56);
+  }
+}
+@keyframes sparkBurstRightV26{
+  0%{
+    opacity:0;
+    transform:translate3d(0,12px,0) rotate(-10deg) scale(.40);
+  }
+  24%{opacity:0;}
+  30%{opacity:.96;}
+  58%{
+    opacity:.98;
+    transform:translate3d(var(--spread-neg-55),var(--rise-neg-62),0)
+      rotate(calc(-18deg + var(--rotate))) scale(.98);
+  }
+  86%{
+    opacity:.74;
+    transform:translate3d(var(--spread-neg-100),var(--rise-neg-100),0)
+      rotate(calc(-28deg + var(--rotate))) scale(.80);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(var(--spread-neg-110),var(--rise-neg-112),0)
+      rotate(calc(-34deg + var(--rotate))) scale(.56);
+  }
+}
+
+@media(max-width:760px){
+  .intro-floral{width:min(39vw,184px)!important;height:min(39vw,184px)!important;}
+  .intro-floral--tl{top:-18px!important;left:-14px!important;}
+  .intro-floral--tr{top:-18px!important;right:-14px!important;}
+  .intro-floral--bl{bottom:-18px!important;left:-10px!important;}
+  .intro-floral--br{bottom:-18px!important;right:-10px!important;}
+
+  .cover-floral{width:min(29vw,128px)!important;height:min(29vw,128px)!important;}
+  .cover-floral--tl{top:6px!important;left:6px!important;}
+  .cover-floral--tr{top:6px!important;right:6px!important;}
+  .cover-floral--bl{bottom:2px!important;left:6px!important;}
+  .cover-floral--br{bottom:2px!important;right:6px!important;}
+
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-104px!important;
+    height:56vh!important;
+    width:72vw!important;
+  }
+  .spark.left{left:8px!important;bottom:-14px!important;}
+  .spark.right{right:8px!important;bottom:-14px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{
+    bottom:-14px!important;
+    width:106px!important;
+    height:78px!important;
+    opacity:.17!important;
+  }
+}
+
+
+/* =========================
+   V27 — robust 4-corner flowers + bottom fountains + performance pass
+   ========================= */
+
+/* Dedicated images for each side: no runtime mirroring, no missing corners. */
+.intro-floral,
+.cover-floral{
+  transform:none!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  pointer-events:none!important;
+}
+.intro-floral--tl,.cover-floral--tl{
+  background-image:url('/assets/floral-top-left.webp')!important;
+  background-position:top left!important;
+}
+.intro-floral--tr,.cover-floral--tr{
+  background-image:url('/assets/floral-top-right.webp')!important;
+  background-position:top right!important;
+}
+.intro-floral--bl,.cover-floral--bl{
+  background-image:url('/assets/floral-bottom-left.webp')!important;
+  background-position:bottom left!important;
+}
+.intro-floral--br,.cover-floral--br{
+  background-image:url('/assets/floral-bottom-right.webp')!important;
+  background-position:bottom right!important;
+}
+
+/* Opening frame: all four bouquets actually sit inside the screen edges. */
+.intro-floral{
+  width:min(27vw,350px)!important;
+  height:min(27vw,350px)!important;
+  opacity:.98!important;
+  z-index:1!important;
+}
+.intro-floral--tl{top:-20px!important;left:-14px!important;}
+.intro-floral--tr{top:-20px!important;right:-14px!important;}
+.intro-floral--bl{bottom:-24px!important;left:-12px!important;}
+.intro-floral--br{bottom:-24px!important;right:-12px!important;}
+
+/* Opened cover: same direction and balanced corner weight. */
+.cover-floral{
+  width:min(25vw,330px)!important;
+  height:min(25vw,330px)!important;
+  opacity:.96!important;
+  z-index:1!important;
+}
+.cover-floral--tl{top:-20px!important;left:-16px!important;}
+.cover-floral--tr{top:-20px!important;right:-16px!important;}
+.cover-floral--bl{bottom:-26px!important;left:-14px!important;}
+.cover-floral--br{bottom:-26px!important;right:-14px!important;}
+
+/* The celebration layer is fixed to the viewport. Fountains originate BELOW the viewport. */
+.celebration-fx{
+  position:fixed!important;
+  inset:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  contain:layout paint style!important;
+  transform:translateZ(0);
+  z-index:165!important;
+}
+.spark-emitter--left,
+.spark-emitter--right{
+  position:absolute!important;
+  bottom:-155px!important;
+  height:64vh!important;
+  width:min(28vw,390px)!important;
+  overflow:visible!important;
+  contain:layout style!important;
+}
+.spark-emitter--left{left:0!important;right:auto!important;}
+.spark-emitter--right{right:0!important;left:auto!important;display:block!important;}
+.spark.left{
+  left:clamp(10px,2.2vw,28px)!important;
+  right:auto!important;
+  bottom:-8px!important;
+  animation:sparkBurstLeftV27 var(--duration) cubic-bezier(.18,.72,.32,1) var(--delay) infinite!important;
+}
+.spark.right{
+  right:clamp(10px,2.2vw,28px)!important;
+  left:auto!important;
+  bottom:-8px!important;
+  animation:sparkBurstRightV27 var(--duration) cubic-bezier(.18,.72,.32,1) var(--delay) infinite!important;
+}
+.spark-emitter--left::before,
+.spark-emitter--right::before{
+  bottom:-16px!important;
+  width:100px!important;
+  height:72px!important;
+  opacity:.12!important;
+  filter:blur(18px)!important;
+}
+
+/* Mostly vertical fan: only a small side spread, so it reads like wedding sparklers. */
+@keyframes sparkBurstLeftV27{
+  0%,20%{opacity:0;transform:translate3d(0,16px,0) rotate(4deg) scale(.42);}
+  27%{opacity:.95;}
+  58%{opacity:.98;transform:translate3d(var(--spread-55),var(--rise-neg-62),0) rotate(calc(9deg + var(--rotate))) scale(.98);}
+  86%{opacity:.68;transform:translate3d(var(--spread-100),var(--rise-neg-100),0) rotate(calc(15deg + var(--rotate))) scale(.80);}
+  100%{opacity:0;transform:translate3d(var(--spread-110),var(--rise-neg-112),0) rotate(calc(20deg + var(--rotate))) scale(.56);}
+}
+@keyframes sparkBurstRightV27{
+  0%,20%{opacity:0;transform:translate3d(0,16px,0) rotate(-4deg) scale(.42);}
+  27%{opacity:.95;}
+  58%{opacity:.98;transform:translate3d(var(--spread-neg-55),var(--rise-neg-62),0) rotate(calc(-9deg + var(--rotate))) scale(.98);}
+  86%{opacity:.68;transform:translate3d(var(--spread-neg-100),var(--rise-neg-100),0) rotate(calc(-15deg + var(--rotate))) scale(.80);}
+  100%{opacity:0;transform:translate3d(var(--spread-neg-110),var(--rise-neg-112),0) rotate(calc(-20deg + var(--rotate))) scale(.56);}
+}
+
+/* Performance: avoid expensive continuous filters/glitter. */
+.spark{filter:none!important;}
+.spark--dot,.spark--streak{box-shadow:0 0 7px rgba(255,226,166,.34)!important;}
+.celebration-fx::after{display:none!important;}
+.intro-card{backdrop-filter:none!important;}
+.player.local-audio-player{backdrop-filter:none!important;}
+.cover-shine::after{animation-duration:8s!important;}
+
+/* The floating pause pill and custom footer were the extra UI; keep the song, hide the clutter. */
+.player.local-audio-player{display:none!important;}
+footer{display:none!important;}
+
+@media(max-width:760px){
+  .intro-floral{width:min(41vw,190px)!important;height:min(41vw,190px)!important;}
+  .intro-floral--tl{top:-8px!important;left:-7px!important;}
+  .intro-floral--tr{top:-8px!important;right:-7px!important;}
+  .intro-floral--bl{bottom:-10px!important;left:-6px!important;}
+  .intro-floral--br{bottom:-10px!important;right:-6px!important;}
+
+  .cover-floral{width:min(33vw,145px)!important;height:min(33vw,145px)!important;}
+  .cover-floral--tl{top:-5px!important;left:-7px!important;}
+  .cover-floral--tr{top:-5px!important;right:-7px!important;}
+  .cover-floral--bl{bottom:-9px!important;left:-6px!important;}
+  .cover-floral--br{bottom:-9px!important;right:-6px!important;}
+
+  .spark-emitter--left,
+  .spark-emitter--right{
+    bottom:-92px!important;
+    height:51vh!important;
+    width:58vw!important;
+  }
+  .spark.left{left:7px!important;bottom:-6px!important;}
+  .spark.right{right:7px!important;bottom:-6px!important;}
+  .spark-emitter--left::before,
+  .spark-emitter--right::before{width:82px!important;height:58px!important;bottom:-10px!important;}
+}
+
+
+/* =========================
+   V28 — restore music toggle + developer-only footer
+   ========================= */
+
+/* Keep only the small developer signature at the end. */
+footer.dev-footer{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:58px!important;
+  padding:17px 20px!important;
+  margin:0!important;
+  background:#4e3525!important;
+  color:#ead6c3!important;
+  text-align:center!important;
+}
+footer.dev-footer .dev-credit{
+  display:block!important;
+  margin:0!important;
+  font:600 10px/1.2 "Alexandria",sans-serif!important;
+  letter-spacing:.12em!important;
+  color:#ead6c3!important;
+  opacity:.9!important;
+}
+
+/* Bring back the lightweight round music control without restoring the old heavy player UI. */
+.player.local-audio-player{
+  display:grid!important;
+  position:fixed!important;
+  left:max(16px,env(safe-area-inset-left))!important;
+  bottom:max(16px,env(safe-area-inset-bottom))!important;
+  width:58px!important;
+  height:58px!important;
+  min-height:58px!important;
+  padding:0!important;
+  place-items:center!important;
+  border-radius:50%!important;
+  background:rgba(255,249,242,.97)!important;
+  border:1px solid rgba(96,64,43,.14)!important;
+  box-shadow:0 10px 28px rgba(70,43,26,.18)!important;
+  backdrop-filter:none!important;
+  z-index:950!important;
+  opacity:0;
+  transform:translateY(14px) scale(.95);
+  transition:opacity .28s ease,transform .28s ease!important;
+}
+.player.local-audio-player.show{
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:auto!important;
+}
+.player.local-audio-player .audio-toggle{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  padding:0!important;
+  background:linear-gradient(145deg,#6e4932,#a87550)!important;
+  color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.20)!important;
+}
+.player.local-audio-player.playing::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:-6px!important;
+  border:1px solid rgba(154,106,74,.24)!important;
+  border-radius:50%!important;
+  animation:audioPulseV28 2.2s ease-out infinite!important;
+  pointer-events:none!important;
+}
+.audio-icon-play{display:block;}
+.audio-icon-pause{display:none;}
+.player.playing .audio-icon-play{display:none!important;}
+.player.playing .audio-icon-pause{display:block!important;}
+@keyframes audioPulseV28{
+  0%{transform:scale(.94);opacity:.65}
+  100%{transform:scale(1.24);opacity:0}
+}
+
+@media(max-width:760px){
+  footer.dev-footer{min-height:54px!important;padding:15px 16px!important;}
+  footer.dev-footer .dev-credit{font-size:9px!important;}
+  .player.local-audio-player{
+    width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    left:12px!important;
+    bottom:max(12px,env(safe-area-inset-bottom))!important;
+  }
+  .player.local-audio-player .audio-toggle{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+  }
+}
