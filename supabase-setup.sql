@@ -35,7 +35,7 @@ for select
 to anon, authenticated
 using (
   is_visible = true
-  and event_slug = 'ahmed-hadder'
+  and event_slug in ('ahmed-hadder', 'ahmed-hadeer')
 );
 
 drop policy if exists "public can add wedding wishes" on public.wedding_wishes;
@@ -45,7 +45,7 @@ for insert
 to anon, authenticated
 with check (
   is_visible = true
-  and event_slug = 'ahmed-hadder'
+  and event_slug in ('ahmed-hadder', 'ahmed-hadeer')
   and char_length(btrim(name)) between 1 and 30
   and char_length(btrim(message)) between 1 and 180
 );

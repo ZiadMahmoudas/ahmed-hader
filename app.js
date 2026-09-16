@@ -14,8 +14,10 @@ const SUPABASE_CONFIG = {
   url: "https://clkgajwnhppwnkzemxgi.supabase.co",
   key: "sb_publishable_5Mcd8Aj5t376Uu1A9E0whQ_c_dTrbR7",
   table: "wedding_wishes",
-  eventSlug: "ahmed-hadeer",
-  pollMs: 3000,
+  // Internal DB slug intentionally matches the existing Supabase RLS policy.
+  // This does NOT change the public Vercel URL (/w/ahmed-hadeer).
+  eventSlug: "ahmed-hadder",
+  pollMs: 8000,
   maxRows: 100
 };
 
@@ -230,6 +232,8 @@ openInvite.addEventListener('click', () => {
   startWeddingAudio();
   startPetalRain();
   startCelebrationFx();
+  // Defer the first Supabase request slightly so opening animation/audio stay smooth.
+  setTimeout(ensureWishesSyncStarted, 900);
 
   setTimeout(() => {
     document.body.classList.remove('locked');
@@ -262,16 +266,33 @@ function registerManualInteraction(delay = CONFIG.autoScrollResumeDelay){
   }, delay);
 }
 
-['wheel','touchstart','touchmove'].forEach(evt => {
-  window.addEventListener(evt, e => {
-    if(e.target.closest && e.target.closest('#player')) return;
-    if(e.target.closest && e.target.closest('.wish-form')){
-      registerManualInteraction(2800);
-      return;
-    }
-    registerManualInteraction();
-  }, {passive:true});
-});
+// Keep manual navigation responsive on phones.
+// Do NOT run timer/class work on every touchmove frame; touchstart/touchend are enough.
+window.addEventListener('wheel', e => {
+  if(e.target.closest && e.target.closest('#player')) return;
+  if(e.target.closest && e.target.closest('.wish-form')){
+    registerManualInteraction(2800);
+    return;
+  }
+  registerManualInteraction();
+}, {passive:true});
+
+window.addEventListener('touchstart', e => {
+  document.documentElement.classList.add('mobile-interacting');
+  if(e.target.closest && e.target.closest('#player')) return;
+  if(e.target.closest && e.target.closest('.wish-form')){
+    registerManualInteraction(2800);
+    return;
+  }
+  registerManualInteraction(1800);
+}, {passive:true});
+
+function endTouchInteraction(){
+  document.documentElement.classList.remove('mobile-interacting');
+  registerManualInteraction(1100);
+}
+window.addEventListener('touchend', endTouchInteraction, {passive:true});
+window.addEventListener('touchcancel', endTouchInteraction, {passive:true});
 
 window.addEventListener('keydown', e => {
   if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key)) registerManualInteraction();
@@ -299,7 +320,7 @@ wishForm.addEventListener('focusout', () => {
 function createTwinkleStars(){
   if(!twinkleStars || twinkleStars.childElementCount) return;
 
-  const count = window.matchMedia('(max-width: 760px)').matches ? 8 : 13;
+  const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 13;
 
   for(let i = 0; i < count; i += 1){
     const star = document.createElement('i');
@@ -324,7 +345,7 @@ function createTwinkleStars(){
 function createFallingStars(){
   if(!fallingStars || fallingStars.childElementCount) return;
 
-  const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 8;
+  const count = window.matchMedia('(max-width: 760px)').matches ? 3 : 8;
 
   for(let i = 0; i < count; i += 1){
     const star = document.createElement('i');
@@ -351,7 +372,7 @@ function createFallingStars(){
 function createFallingHearts(){
   if(!fallingHearts || fallingHearts.childElementCount) return;
 
-  const count = window.matchMedia('(max-width: 760px)').matches ? 6 : 5;
+  const count = window.matchMedia('(max-width: 760px)').matches ? 4 : 5;
 
   for(let i = 0; i < count; i += 1){
     const heart = document.createElement('i');
@@ -380,7 +401,8 @@ function seedSparkEmitter(emitter, side = 'left'){
 
   const isMobile = window.matchMedia('(max-width: 760px)').matches;
   // A richer spark density, but still light enough for phones.
-  const count = isMobile ? 42 : 38;
+  // 14 per side on phones keeps the same fountain effect without 84 animated layers.
+  const count = isMobile ? 14 : 38;
   const sparkTypes = ['spark--dot','spark--streak','spark--dot','spark--star','spark--streak','spark--dot'];
 
   for(let i = 0; i < count; i += 1){
@@ -440,7 +462,7 @@ function startCelebrationFx(){
 function createPetalRain(){
   if(!petalRain || petalRain.childElementCount) return;
 
-  const count = window.matchMedia('(max-width: 760px)').matches ? 5 : 8;
+  const count = window.matchMedia('(max-width: 760px)').matches ? 3 : 8;
   const palettes = ['wine','blush','ivory'];
 
   for(let i = 0; i < count; i += 1){
@@ -479,12 +501,19 @@ const observer = new IntersectionObserver(entries => {
 },{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Page progress
-window.addEventListener('scroll', () => {
+// Page progress — transform-only + RAF throttling avoids a layout write on every scroll frame.
+let progressRAF = null;
+function updateScrollProgress(){
+  progressRAF = null;
   const max = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
-  scrollProgress.style.width = `${Math.min(100,pct)}%`;
+  const ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+  scrollProgress.style.transform = `scaleX(${ratio})`;
+}
+window.addEventListener('scroll', () => {
+  if(progressRAF) return;
+  progressRAF = requestAnimationFrame(updateScrollProgress);
 },{passive:true});
+updateScrollProgress();
 
 // Countdown
 function updateCountdown(){
@@ -790,16 +819,23 @@ async function saveWishToSupabase(name, message){
   return Array.isArray(rows) ? rows[0] : rows;
 }
 
-// Load in the background immediately so the slider is ready before auto-scroll reaches it.
-loadAllWishesFromSupabase();
-startWishesSync();
+// Start guestbook networking after the invitation opens so it does not compete with
+// the cover/fonts/first paint on mobile.
+let wishesSyncStarted = false;
+function ensureWishesSyncStarted(){
+  if(wishesSyncStarted) return;
+  wishesSyncStarted = true;
+  loadAllWishesFromSupabase();
+  startWishesSync();
+}
 
 document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible') syncNewWishesFromSupabase();
+  if(document.visibilityState === 'visible' && wishesSyncStarted) syncNewWishesFromSupabase();
 });
 
 wishForm.addEventListener('submit', async e => {
   e.preventDefault();
+  ensureWishesSyncStarted();
 
   const name = wishName.value.trim();
   const message = wishMessage.value.trim();
